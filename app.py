@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route('/professor', methods=['GET'])
 def getProfessor():
-    dados = {
+    dados = {   
         "professor":[
             {"id":1, "nome":"Matheus", "idade":44, "materia":"api", "observacoes":""},
             {"id":2, "nome":"Tiago", "idade":29, "materia":"bd", "observacoes":""},

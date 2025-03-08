@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -38,6 +38,62 @@ Aluno("Carlos Oliveira", 19, "1A", "2005-02-20", 8.5, 7.0)
 @app.route("/alunos", methods=['GET'])
 def Get_Alunos():
     return jsonify([aluno.dici() for aluno in Aluno.alunos])
+
+@app.route('/alunos/<int:idAluno>', methods=['GET'])
+def getAlunosPorID(idAluno):
+    for aluno in Aluno.alunos:
+        if aluno.id == idAluno:
+            return jsonify(
+                {
+                    "id": aluno.id, 
+                    "nome": aluno.nome,
+                    "idade": aluno.idade, 
+                    "Turma": aluno.turma,
+                    "Data de nascimento": aluno.data_nascimento,
+                    "Nota do primeiro semestre": aluno.nota_1,
+                    "Nota do segundo semestre": aluno.nota_2,
+                    "Media final": aluno.media_final
+                }
+            )
+    return jsonify({'mensagem': 'Usuário não encontrado'}), 404
+
+@app.route('/alunos', methods=['POST'])
+def createAluno():
+    dados = request.json
+    novo_aluno = Aluno(
+        nome=dados["nome"],
+        idade=dados["idade"],
+        turma_id=dados["Turma"],
+        data_nascimento=dados["Data de nascimento"],
+        nota_semestre_1=dados["Nota do primeiro semestre"],
+        nota_semestre_2=dados["Nota do segundo semestre"]
+    )
+    return jsonify(novo_aluno.dici()), 201
+
+@app.route('/alunos/<int:idAluno>', methods=['PUT'])
+def updateAluno(idAluno):
+    for aluno in Aluno.alunos:
+        if aluno.id == idAluno:
+            dados = request.json
+            aluno.nome = dados.get('nome', aluno.nome)
+            aluno.idade = dados.get('idade', aluno.idade)
+            aluno.turma = dados.get('turma', aluno.turma)
+            aluno.data_nascimento = dados.get('data_nascimento', aluno.data_nascimento)
+            aluno.nota_1 = dados.get('nota_1', aluno.nota_1)
+            aluno.nota_2 = dados.get('nota_2', aluno.nota_2)
+            aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
+            return jsonify(aluno.dici())
+        
+    return jsonify({'mensagem': 'Usuário não encontrado'}), 404
+
+@app.route('/alunos/<int:idAluno>', methods=['DELETE'])
+def deleteAluno(idAluno):
+    for aluno in Aluno.alunos:
+        if aluno.id == idAluno:
+            Aluno.alunos.remove(aluno)
+            return jsonify({'mensagem': 'Usuário deletado'})
+        
+    return jsonify({'mensagem': 'Usuário não encontrado'}), 404
 
 # =================== CLASSE PROFESSOR ===================
 class Professor():

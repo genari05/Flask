@@ -60,11 +60,20 @@ def getAlunosPorID(idAluno):
 @app.route('/alunos', methods=['POST'])
 def createAluno():
     dados = request.json
+
+    nome = dados.get("nome", "")
+    if not nome:
+        return jsonify({'mensagem': 'O aluno inserido não tem nome'}), 400
+    
+    data_nascimento = dados.get("Data de nascimento", "")
+    if not data_nascimento:
+        return jsonify({'mensagem': 'O aluno inserido não tem data de nascimento'}), 400
+
     novo_aluno = Aluno(
-        nome=dados["nome"],
+        nome=nome,
         idade=dados["idade"],
         turma_id=dados["Turma"],
-        data_nascimento=dados["Data de nascimento"],
+        data_nascimento=data_nascimento,
         nota_semestre_1=dados["Nota do primeiro semestre"],
         nota_semestre_2=dados["Nota do segundo semestre"]
     )
@@ -75,12 +84,17 @@ def updateAluno(idAluno):
     for aluno in Aluno.alunos:
         if aluno.id == idAluno:
             dados = request.json
-            aluno.nome = dados.get('nome', aluno.nome)
+
+            nome = dados.get('nome', aluno.nome)
+            if not nome:
+                return jsonify({'mensagem': 'O aluno inserido não tem nome'}), 400
+
+            aluno.nome = nome
             aluno.idade = dados.get('idade', aluno.idade)
-            aluno.turma = dados.get('turma', aluno.turma)
+            aluno.turma = dados.get('Turma', aluno.turma)
             aluno.data_nascimento = dados.get('data_nascimento', aluno.data_nascimento)
-            aluno.nota_1 = dados.get('nota_1', aluno.nota_1)
-            aluno.nota_2 = dados.get('nota_2', aluno.nota_2)
+            aluno.nota_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
+            aluno.nota_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
             aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
             return jsonify(aluno.dici())
         

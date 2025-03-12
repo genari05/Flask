@@ -50,3 +50,9 @@ class TesteStringMethods(unittest.TestCase):
         
         if r.status_code == 404:
             self.fail("Voce não defineiu a pagina /alunos no seu server")
+        
+        try:
+            obt_retornado = r.json()
+        except:
+            self.fail("Queria um Json mas voce retornou outra coisa")
+            self.assertEqual(type(obt_retornado), type([]))

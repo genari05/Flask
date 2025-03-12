@@ -43,7 +43,7 @@ No teste 008b, tento editar um aluno, usando o verbo put, mas mando um dicionár
 Testes 100 a 109: Teremos as URLs análogas para professores.
 '''
 
-class TesteStringMethods(unittest.TestCase):
+class TestStringMethods(unittest.TestCase):
     
     def test_000_alunos_retorna_lista(self):
         r=requests.get('http://localhost:5000/alunos')
@@ -56,3 +56,57 @@ class TesteStringMethods(unittest.TestCase):
         except:
             self.fail("Queria um Json mas voce retornou outra coisa")
             self.assertEqual(type(obt_retornado), type([]))
+            
+    def teste_001_adiciona_aluno(self):
+        #criar dois alunos
+        r= requests.post('http://localhost:5000/alunos',json= {
+    "Data de nascimento": "2003-02-01",
+    "Media final": 10.0,
+    "Nota do primeiro semestre": 10.,
+    "Nota do segundo semestre": 10.0,
+    "Turma": "1B",
+    "id": 4,
+    "idade": 16,
+    "nome": "Samuel"
+  })
+        r= requests.post('http://localhost:5000/alunos',json= {
+    "Data de nascimento": "2003-05-05",
+    "Media final": 10.0,
+    "Nota do primeiro semestre": 10.,
+    "Nota do segundo semestre": 10.0,
+    "Turma": "1C",
+    "id": 5,
+    "idade": 13,
+    "nome": "Davi"
+  })
+        r_lista =requests.get('http://localhost:5000/alunos')
+        lista_retorna = r_lista.json()
+        
+        achei_samuel = False
+        achei_Davi = False
+        for aluno in lista_retorna:
+            if aluno['nome'] == 'Samuel':
+                achei_samuel = True
+            if aluno['nome'] == 'Davi':
+                achei_Davi = True
+            
+            
+        if not achei_samuel:
+            self.fail('aluno Samuel nao apareceu na lista de alunos')
+        if not achei_Davi:
+            self.fail('aluno Davi nao apareceu na lista de alunos')
+            
+            
+            
+            
+            
+            
+            
+
+def runTests():
+        suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)
+        unittest.TextTestRunner(verbosity=2,failfast=True).run(suite)
+
+
+if __name__ == '__main__':
+    runTests()

@@ -63,19 +63,19 @@ def createAluno():
 
     nome = dados.get("nome", "")
     if not nome:
-        return jsonify({'mensagem': 'O aluno inserido não tem nome'}), 400
+        return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
     
     data_nascimento = dados.get("Data de nascimento", "")
     if not data_nascimento:
-        return jsonify({'mensagem': 'O aluno inserido não tem data de nascimento'}), 400
+        return jsonify({'mensagem': 'O aluno necessita ter data de nascimento'}), 400
 
     novo_aluno = Aluno(
         nome=nome,
         idade=dados["idade"],
         turma_id=dados["Turma"],
         data_nascimento=data_nascimento,
-        nota_semestre_1=dados["Nota do primeiro semestre"],
-        nota_semestre_2=dados["Nota do segundo semestre"]
+        nota_semestre_1=dados.get("Nota do primeiro semestre", 0),
+        nota_semestre_2=dados.get("Nota do segundo semestre", 0)
     )
     return jsonify(novo_aluno.dici()), 201
 
@@ -87,7 +87,7 @@ def updateAluno(idAluno):
 
             nome = dados.get('nome', aluno.nome)
             if not nome:
-                return jsonify({'mensagem': 'O aluno inserido não tem nome'}), 400
+                return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
 
             aluno.nome = nome
             aluno.idade = dados.get('idade', aluno.idade)
@@ -159,11 +159,20 @@ def getProfessorPorID(idProfessor):
 @app.route('/professores', methods=['POST'])
 def createProfessor():
     dados = request.json
+
+    nome = dados.get("nome", "")
+    if not nome:
+        return jsonify({'mensagem': 'O professor necessita de um nome'}), 400
+    
+    materia = dados.get("Materia", "")
+    if not materia:
+        return jsonify({'mensagem': 'O professor necessita de uma matéria'}), 400
+
     novo_professor = Professor(
-        nome=dados["nome"],
-        idade=dados["idade"],
-        materia=dados["Materia"],
-        observacoes=dados["Observações"]
+        nome=nome,
+        idade=dados.get("idade", ""),
+        materia=materia,
+        observacoes=dados.get("Observações", "")
     )
     return jsonify(novo_professor.dici()), 201
 
@@ -172,7 +181,12 @@ def updateProfessor(idProfessor):
     for professor in Professor.professores:
         if professor.id == idProfessor:
             dados = request.json
-            professor.nome = dados.get('nome', professor.nome)
+
+            nome = dados.get('nome', professor.nome)
+            if not nome:
+                return jsonify({'mensagem': 'O professor necessita de um nome'}), 400
+
+            professor.nome = nome
             professor.idade = dados.get('idade', professor.idade)
             professor.materia = dados.get('materia', professor.materia)
             professor.observacoes = dados.get('observacoes', professor.observacoes)
@@ -206,7 +220,7 @@ class Turma():
         for professor in Professor.professores:
             if professor.id == professor_id:
                 return professor.dici()
-        return {"Professor não encontrado": "Erro"}
+        return {"mensagem": "Professor não encontrado"}
     
     def dici(self):
         return {
@@ -243,10 +257,19 @@ def getTurmaPorID(idTurma):
 @app.route('/turmas', methods=['POST'])
 def createTurma():
     dados = request.json
+
+    descricao = dados.get("Descrição", "")
+    if not descricao:
+        return jsonify({'mensagem': 'A turma necessita de uma descrição'}), 400
+    
+    ativo = dados.get("Ativo", "")
+    if not ativo:
+        return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
+
     nova_turma = Turma(
-        descricao=dados["Descrição"],
-        professor_id=dados["Professor"]["id"],
-        ativo=dados["Ativo"]
+        descricao=descricao,
+        professor_id=dados.get('Professor', {}).get('id'),
+        ativo=ativo
     )
 
     return jsonify(nova_turma.dici()), 201
@@ -256,8 +279,17 @@ def updateTurma(idTurma):
     for turma in Turma.turmas:
         if turma.id == idTurma:
             dados = request.json
-            turma.descricao = dados.get('Descrição', turma.descricao)
-            turma.ativo = dados.get('Ativo', turma.ativo)
+
+            descricao = dados.get("Descrição", "")
+            if not descricao:
+                return jsonify({'mensagem': 'A turma necessita de uma descrição'}), 400
+    
+            ativo = dados.get("Ativo", "")
+            if not ativo:
+                return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
+            
+            turma.descricao = descricao
+            turma.ativo = ativo
 
             professor_id = dados.get('Professor', {}).get('id')
             if professor_id:

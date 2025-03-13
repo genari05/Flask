@@ -96,12 +96,6 @@ class TestStringMethods(unittest.TestCase):
         if not achei_Davi:
             self.fail('aluno Davi nao apareceu na lista de alunos')
             
-            
-            
-            
-            
-            
-            
 
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)

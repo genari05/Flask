@@ -308,5 +308,7 @@ def deleteTurma(idTurma):
         
     return jsonify({'mensagem': 'Turma não encontrada'}), 404
 
+
+
 if __name__ == "__main__":
     app.run(debug=True)

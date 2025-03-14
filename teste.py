@@ -69,7 +69,7 @@ class TestStringMethods(unittest.TestCase):
     "idade": 16,
     "nome": "Samuel"
   })
-        r= requests.post('http://localhost:5000/alunos',json= {
+        r = requests.post('http://localhost:5000/alunos',json= {
     "Data de nascimento": "2003-05-05",
     "Media final": 10.0,
     "Nota do primeiro semestre": 10.,
@@ -95,12 +95,35 @@ class TestStringMethods(unittest.TestCase):
             self.fail('aluno Samuel nao apareceu na lista de alunos')
         if not achei_Davi:
             self.fail('aluno Davi nao apareceu na lista de alunos')
-            
+    
+    
+    def teste_002_aluno_por_id(self):
+        #Criar um aluno marcos com id 20 
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2003-05-05",
+            "Media final": 10.0,
+            "Nota do primeiro semestre": 10.,
+            "Nota do segundo semestre": 10.0,
+            "Turma": "1C",
+            "id": 6,
+            "idade": 15,
+            "nome": "mario"
+        })
+        resposta = requests.get('http://localhost:5000/alunos/20')
+        dic_retornado = resposta.json()# Pega o dicionario e retorna Json
+        self.assertEqual(type(dic_retornado), dict)
+        self.assertIn('nome',dic_retornado)
+        self.assertEqual(dic_retornado['nome'], 'mario')
+        
+    
+
+
+
+
 
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)
         unittest.TextTestRunner(verbosity=2,failfast=True).run(suite)
-
-
+        
 if __name__ == '__main__':
     runTests()

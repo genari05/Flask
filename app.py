@@ -308,7 +308,12 @@ def deleteTurma(idTurma):
         
     return jsonify({'mensagem': 'Turma não encontrada'}), 404
 
-
+@app.route('/reseta', methods=['POST'])
+def resetar_dados():
+    Aluno.alunos.clear()
+    Professor.professores.clear()
+    Turma.turmas.clear()
+    return jsonify({'mensagem': 'Dados resetados com sucesso'}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)

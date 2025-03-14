@@ -117,12 +117,11 @@ class TestStringMethods(unittest.TestCase):
         
     
 
-    '''def teste_003_reseta(self):
+    def teste_003_reseta(self):
          r = requests.post('http://localhost:5000/alunos', json={  
             "Data de nascimento": "2005-05-05",
-            "Media final": 10.0,
-            "Nota do primeiro semestre": 10.,
-            "Nota do segundo semestre": 10.0,
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
             "Turma": "1C",
             "id": 7,
             "idade": 17,
@@ -132,12 +131,12 @@ class TestStringMethods(unittest.TestCase):
          r_lista = requests.get('http://localhost:5000/alunos')
          self.assertTrue(len(r_lista.json()) > 0)
          
-         r_reseta = requests.post('http://localhost:5000/alunos/reseta')
+         r_reseta = requests.post('http://localhost:5000/reseta')
          self.assertEqual(r_reseta.status_code,200)
-         r_lista_depois = requests.get('http://localhost:500/alunos')
+         r_lista_depois = requests.get('http://localhost:5000/alunos')
         
          #e agora tem que ter 0 elementos
-         self.assertEqual(len(r_lista_depois.json()),0)'''
+         self.assertEqual(len(r_lista_depois.json()),0)
          
     def teste_004_delete(self):
         pass

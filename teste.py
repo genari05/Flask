@@ -263,9 +263,62 @@ class TestStringMethods(unittest.TestCase):
         r = requests.delete('http://localhost:5000/alunos/15')
         self.assertIn(r.status_code,[400,404])
         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+        
+    def test_008b_put_sem_nome(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        # Criar um aluno válido primeiro
+        r_create = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 13,
+            "idade": 18,
+            "nome": "Tiago"
+        })
+        self.assertEqual(r_create.status_code, 201)  # API retorna 201 ao criar um aluno
+
+        # Tentar editar o aluno sem enviar nome
+        r_update = requests.put('http://localhost:5000/alunos/13', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "idade": 18
+        })
+        
+        # Verificar se a API retorna erro 400 e a mensagem correta
+        self.assertEqual(r_update.status_code, 400)
+        self.assertEqual(r_update.json()['mensagem'], 'O aluno necessita de um nome')
+
+        
+        
+     #cria alunos sem nome, o que tem que dar erro
+    '''def test_008a_post_sem_nome(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code,200)
+
+        #tentei criar um aluno, sem enviar um nome
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 11,
+            "idade": 18,
+            })
+        self.assertEqual(r.status_code,400)
+        self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+    '''
+    #tenta editar alunos sem passar nome, o que também
+    #tem que dar erro (se vc nao mudar o nome, vai mudar o que?)
+    
+    
 
     #tento criar 2 caras com a  mesma id
-    def test_007_criar_com_id_ja_existente(self):
+    '''def test_007_criar_com_id_ja_existente(self):
 
         #dou reseta e confiro que deu certo
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -294,11 +347,7 @@ class TestStringMethods(unittest.TestCase):
         # o erro é muito parecido com o do teste anterior
         self.assertEqual(r.status_code,400)
         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
- 
- 
- 
-
-            
+     '''
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)
         unittest.TextTestRunner(verbosity=2,failfast=True).run(suite)

@@ -32,7 +32,7 @@ com a chave nome, que deveremos processar
 
 Se o usuário manda um dicionário {“nome”:”José”} para a url /alunos/40,
 com o verbo PUT, trocamos o nome do usuário 40 para José
-
+''''''
 Tratamento de erros
 
 Testes 006 a 008b: Erros de usuário darão um código de status 400, e retornarão um dicionário descrevendo o erro. 
@@ -125,7 +125,7 @@ class TestStringMethods(unittest.TestCase):
             "Turma": "1C",
             "id": 7,
             "idade": 17,
-            "nome": "cicero"
+            "nome": "caio"
             })
      
          r_lista = requests.get('http://localhost:5000/alunos')
@@ -139,10 +139,166 @@ class TestStringMethods(unittest.TestCase):
          self.assertEqual(len(r_lista_depois.json()),0)
          
     def teste_004_delete(self):
-        pass
-             
+        r_reseta = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reseta.status_code,200)
+        requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 8,
+            "idade": 20,
+            "nome": "cicero"
+            })
+        requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 9,
+            "idade": 19,
+            "nome": "lucas"
+            })
+        requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 10,
+            "idade": 18,
+            "nome": "marta"
+            })
+        
+        r_lista = requests.get('http://localhost:5000/alunos')
+        lista_retornada = r_lista.json()
+        self.assertEqual(len(lista_retornada),3)
+        #Removendo o luca id 9
+        requests.delete('http://localhost:5000/alunos/10')  
+        #Retornando a lista com apenas dois id 8 e 10
+        r_lista2 = requests.get('http://localhost:5000/alunos')
+        lista_retornada2 = r_lista2.json()
+        #e vejo se ficou só um elemento
+        self.assertEqual(len(lista_retornada2),2)  
+        
+        acheilucas = False
+        acheiCicero = False
+        for aluno in lista_retornada2:
+            if aluno['nome'] == 'lucas': 
+                acheilucas=True
+            if aluno['nome'] == 'cicero':
+                acheiCicero=True
+                
+        if not acheilucas or not acheiCicero:
+            self.fail("voce parece ter deletado o aluno errado!")
 
+        r = requests.delete('http://localhost:5000/alunos/9')
 
+        r_lista3 = requests.get('http://localhost:5000/alunos')
+        lista_retornada3 = r_lista3.json()
+        self.assertEqual(len(lista_retornada3),1) 
+
+        if lista_retornada3[0]['nome'] == 'cicero':
+            pass
+        else:
+            self.fail("voce parece ter deletado o aluno errado!")
+    
+            
+    def teste_005_editar(self):
+        #Reseta
+         r_reseta = requests.post('http://localhost:5000/reseta')
+         self.assertEqual(r_reseta.status_code,200)
+        #Criando um aluno 
+         requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 11,
+            "idade": 18,
+            "nome": "lucas"
+            })   
+         #e peguei o dicionario dele
+         r_antes = requests.get('http://localhost:5000/alunos/11')
+         self.assertEqual(r_antes.json()['nome'],'lucas')
+         
+         # vamos fazer um PUT porque vamos alterar apenas o nome mas no ID 11
+         requests.put('http://localhost:5000/alunos/11', 
+                      json={'nome':'lucas mendes'})
+         
+         #Vamos puxar e ver o novo nome, agora lucas mensdes 
+         r_depois = requests.get('http://localhost:5000/alunos/11')
+         self.assertEqual(r_depois.json()['nome'],'lucas mendes')
+         self.assertEqual(r_depois.json()['id'],11)
+         
+    def test_006a_id_inexistente_no_put(self):
+        #Reseta
+         r_reseta = requests.post('http://localhost:5000/reseta')
+         self.assertEqual(r_reseta.status_code,200)
+         #estou tentando EDITAR um aluno que nao existe (verbo PUT)
+         r = requests.put('http://localhost:5000/alunos/15',json={'nome':'bowser','id':15})
+        #tem que dar erro 400 ou 404
+        #ou seja, r.status_code tem que aparecer na lista [400,404]
+         self.assertIn(r.status_code,[400,404])
+        #qual a resposta que a linha abaixo pede?
+        #um json, com o dicionario {"erro":"aluno nao encontrado"}
+         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+         
+         
+    def test_006b_id_inexistente_no_get(self):
+        #reseto
+        r_reset = requests.post('http://localhost:5000/reseta')
+        #vejo se nao deu pau resetar
+        self.assertEqual(r_reset.status_code,200)
+        #agora faço o mesmo teste pro GET, a consulta por id
+        r = requests.get('http://localhost:5000/alunos/15')
+        self.assertIn(r.status_code,[400,404])
+        #olhando pra essa linha debaixo, o que está especificado que o servidor deve retornar
+        self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+
+    def test_006c_id_inexistente_no_delete(self):
+        #reseto
+        r_reset = requests.post('http://localhost:5000/reseta')
+        #vejo se nao deu pau resetar
+        self.assertEqual(r_reset.status_code,200)
+        r = requests.delete('http://localhost:5000/alunos/15')
+        self.assertIn(r.status_code,[400,404])
+        self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+
+    #tento criar 2 caras com a  mesma id
+    def test_007_criar_com_id_ja_existente(self):
+
+        #dou reseta e confiro que deu certo
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code,200)
+
+        #crio o usuario bond e confiro
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 12,
+            "idade": 18,
+            "nome": "lucas"
+            })  
+        #tento usar o mesmo id para outro usuário
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 12,
+            "idade": 18,
+            "nome": "lucas"
+            })  
+        # o erro é muito parecido com o do teste anterior
+        self.assertEqual(r.status_code,400)
+        self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+ 
+ 
+ 
+
+            
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)
         unittest.TextTestRunner(verbosity=2,failfast=True).run(suite)

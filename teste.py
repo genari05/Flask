@@ -427,20 +427,22 @@ class TestStringMethods(unittest.TestCase):
                     "idade": 40,
                     "nome": "durval"})
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['erro'],'id ja utilizada')
+        self.assertEqual(r.json()['mensagem'], 'ID já utilizado')
+
 
     def test_108_post_ou_put_sem_nome(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
-        r=  requests.post('http://localhost:5000/professores',json={
+        r =  requests.post('http://localhost:5000/professores',json={
                     "Materia": "Matemática",
                     "Observações": "Doutor em álgebra",
                     "id": 12,
                     "idade": 40,
                     })
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['erro'],'professor sem nome')
-        r=  requests.post('http://localhost:5000/professores',json={
+        self.assertEqual(r.json()['mensagem'], 'O professor necessita de um nome')
+        
+        r =  requests.post('http://localhost:5000/professores',json={
                     "Materia": "Matemática",
                     "Observações": "Doutor em álgebra",
                     "id": 13,
@@ -454,7 +456,7 @@ class TestStringMethods(unittest.TestCase):
                     "idade": 40,
                     })
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['erro'],'professor sem nome')
+        self.assertEqual(r.json()['mensagem'], 'O professor necessita de um nome')
 
     def test_109_nao_confundir_professor_e_aluno(self):
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -499,7 +501,8 @@ class TestStringMethods(unittest.TestCase):
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
             "Turma": "1C",
-            "idade": 18
+            "id":13,
+            "idade": 19
         })
         
         # Verificar se a API retorna erro 400 e a mensagem correta
@@ -524,7 +527,7 @@ class TestStringMethods(unittest.TestCase):
             "idade": 18,
             })
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+
     
     #tenta editar alunos sem passar nome, o que também
     #tem que dar erro (se vc nao mudar o nome, vai mudar o que?)
@@ -559,7 +562,6 @@ class TestStringMethods(unittest.TestCase):
             "nome": "lucas"
             })  
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
     
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)

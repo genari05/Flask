@@ -90,29 +90,34 @@ def createAluno():
 
 @app.route('/alunos/<int:idAluno>', methods=['PUT'])
 def updateAluno(idAluno):
-    for aluno in Aluno.alunos:
-        if aluno.id == idAluno:
-            dados = request.json
+    try:
+        for aluno in Aluno.alunos:
+            if aluno.id == idAluno:
+                dados = request.json
 
-            nome = dados.get('nome', aluno.nome)
-            if not nome:
-                return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
+                # Verifica se 'nome' está presente na requisição, mesmo que esteja vazio
+                if "nome" not in dados or not dados["nome"].strip():
+                    return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
 
-            aluno.nome = nome
-            aluno.turma = dados.get('Turma', aluno.turma)
+                aluno.nome = dados["nome"]
+                aluno.turma = dados.get('Turma', aluno.turma)
 
-            try:
-                aluno.data_nascimento = dados.get('Data de nascimento')
-                aluno.idade = aluno.CalcularIdade(aluno.data_nascimento)
-            except ValueError as e:
-                return jsonify({'mensagem': str(e)}), 400
+                try:
+                    aluno.data_nascimento = dados.get('Data de nascimento', aluno.data_nascimento)
+                    aluno.idade = aluno.CalcularIdade(aluno.data_nascimento)
+                except ValueError as e:
+                    return jsonify({'mensagem': str(e)}), 400
 
-            aluno.nota_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
-            aluno.nota_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
-            aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
-            return jsonify(aluno.dici())
-        
-    return jsonify({'mensagem': 'Aluno não encontrado'}), 404
+                aluno.nota_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
+                aluno.nota_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
+                aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
+                
+                return jsonify(aluno.dici())
+
+        return jsonify({'mensagem': 'Aluno não encontrado'}), 404
+
+    except Exception as e:
+        return jsonify({'mensagem': f'Erro inesperado: {str(e)}'}), 500
 
 @app.route('/alunos/<int:idAluno>', methods=['DELETE'])
 def deleteAluno(idAluno):

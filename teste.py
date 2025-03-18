@@ -448,15 +448,15 @@ class TestStringMethods(unittest.TestCase):
                     "id": 13,
                     "idade": 40,
                     "nome": "maximus"})
-        self.assertEqual(r.status_code,200)
-        r=  requests.put('http://localhost:5000/professores',json={
+        self.assertEqual(r.status_code,201)
+        r =  requests.put('http://localhost:5000/professores/13',json={
                     "Materia": "Matemática",
                     "Observações": "Doutor em álgebra",
                     "id": 13,
                     "idade": 40,
                     })
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['mensagem'], 'O professor necessita de um nome')
+        self.assertEqual(r.json()['erro'], 'professor sem nome')
 
     def test_109_nao_confundir_professor_e_aluno(self):
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -466,14 +466,14 @@ class TestStringMethods(unittest.TestCase):
                     "id": 1,
                     "idade": 40,
                     "nome": "durval"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
         r =  requests.post('http://localhost:5000/professores',json={
                     "Materia": "Matemática",
                     "Observações": "Doutor em álgebra",
                     "id": 2,
                     "idade": 40,
                     "nome": "leo"})
-        self.assertEqual(r.status_code,200)
+        self.assertEqual(r.status_code,201)
         r_lista = requests.get('http://localhost:5000/professores')
         self.assertEqual(len(r_lista.json()),2)
         r_lista_alunos = requests.get('http://localhost:5000/alunos')

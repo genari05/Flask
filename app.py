@@ -207,17 +207,19 @@ def updateProfessor(idProfessor):
         if professor.id == idProfessor:
             dados = request.json
 
-            nome = dados.get('nome', professor.nome)
-            if not nome:
-                return jsonify({'mensagem': 'O professor necessita de um nome'}), 400
+            # Pegando o nome sem valor padrão
+            nome = dados.get('nome', "").strip()
+            if not nome:  # Se estiver ausente ou vazio, retorna erro
+                return jsonify({'erro': 'professor sem nome'}), 400
 
             professor.nome = nome
             professor.idade = dados.get('idade', professor.idade)
-            professor.materia = dados.get('materia', professor.materia)
-            professor.observacoes = dados.get('observacoes', professor.observacoes)
+            professor.materia = dados.get('Materia', professor.materia)
+            professor.observacoes = dados.get('Observações', professor.observacoes)
             return jsonify(professor.dici())
     
     return jsonify({'mensagem': 'Professor não encontrado'}), 404
+
 
 @app.route('/professores/<int:idProfessor>', methods=['DELETE'])
 def deleteProfessor(idProfessor):

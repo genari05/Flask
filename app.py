@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from flask import Flask, jsonify, request
 
 app = Flask(__name__) 
@@ -5,20 +6,28 @@ app = Flask(__name__)
 # =================== CLASSE ALUNO ===================
 class Aluno():
     alunos = []
-    contador_id = 1
 
-    def __init__(self, nome, idade, turma_id, data_nascimento, nota_semestre_1, nota_semestre_2):
-        self.id = Aluno.contador_id
+    def __init__(self, id, nome, turma_id, data_nascimento, nota_semestre_1, nota_semestre_2):
+        self.id = id
         self.nome = nome
-        self.idade = idade
+        self.idade = self.CalcularIdade(data_nascimento)
         self.turma = turma_id
         self.data_nascimento = data_nascimento
         self.nota_1 = nota_semestre_1
         self.nota_2 = nota_semestre_2
         self.media_final = (nota_semestre_1 + nota_semestre_2) / 2
-        Aluno.contador_id += 1
         Aluno.alunos.append(self)
     
+    def CalcularIdade(self, data_nascimento):
+        try:
+            dataNascimento = datetime.strptime(data_nascimento, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError("O formato da data de nascimento está errado, passe YYYY-MM-DD")
+
+        hoje = datetime.now()
+        idade = hoje.year - dataNascimento.year - ((hoje.month, hoje.day) < (dataNascimento.month, dataNascimento.day))
+        return idade
+
     def dici(self):
         return {
             "id": self.id,
@@ -31,9 +40,9 @@ class Aluno():
             "Media final": self.media_final
         }
 
-Aluno("João Silva", 20, "1A", "2004-05-10", 7.5, 8.0)
-Aluno("Maria Souza", 22, "2B", "2002-09-15", 6.0, 9.5)
-Aluno("Carlos Oliveira", 19, "1A", "2005-02-20", 8.5, 7.0)
+Aluno(1, "João Silva", "1A", "2004-05-10", 7.5, 8.0)
+Aluno(2, "Maria Souza", "2B", "2002-09-15", 6.0, 9.5)
+Aluno(3, "Carlos Oliveira", "1A", "2005-02-20", 8.5, 7.0)
 
 @app.route("/alunos", methods=['GET'])
 def Get_Alunos():
@@ -43,23 +52,19 @@ def Get_Alunos():
 def getAlunosPorID(idAluno):
     for aluno in Aluno.alunos:
         if aluno.id == idAluno:
-            return jsonify(
-                {
-                    "id": aluno.id,
-                    "nome": aluno.nome,
-                    "idade": aluno.idade,
-                    "Turma": aluno.turma,
-                    "Data de nascimento": aluno.data_nascimento,
-                    "Nota do primeiro semestre": aluno.nota_1,
-                    "Nota do segundo semestre": aluno.nota_2,
-                    "Media final": aluno.media_final
-                }
-            )
+            return jsonify(aluno.dici())
     return jsonify({'mensagem': 'Aluno não encontrado'}), 404
 
 @app.route('/alunos', methods=['POST'])
 def createAluno():
     dados = request.json
+
+    id = dados.get("id", "")
+    if not id:
+        return jsonify({'mensagem': 'O aluno necessita de um id'}), 400
+    for aluno in Aluno.alunos:
+        if aluno.id == id:
+            return jsonify({'mensagem': 'ID já utilizado'}), 400
 
     nome = dados.get("nome", "")
     if not nome:
@@ -69,14 +74,18 @@ def createAluno():
     if not data_nascimento:
         return jsonify({'mensagem': 'O aluno necessita ter data de nascimento'}), 400
 
-    novo_aluno = Aluno(
-        nome=nome,
-        idade=dados["idade"],
-        turma_id=dados["Turma"],
-        data_nascimento=data_nascimento,
-        nota_semestre_1=dados.get("Nota do primeiro semestre", 0),
-        nota_semestre_2=dados.get("Nota do segundo semestre", 0)
-    )
+    try:
+        novo_aluno = Aluno(
+            id=id,
+            nome=nome,
+            turma_id=dados["Turma"],
+            data_nascimento=data_nascimento,
+            nota_semestre_1=dados.get("Nota do primeiro semestre", 0),
+            nota_semestre_2=dados.get("Nota do segundo semestre", 0)
+        )
+    except ValueError as e:
+        return jsonify({'mensagem': str(e)}), 400
+    
     return jsonify(novo_aluno.dici()), 201
 
 @app.route('/alunos/<int:idAluno>', methods=['PUT'])
@@ -90,9 +99,14 @@ def updateAluno(idAluno):
                 return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
 
             aluno.nome = nome
-            aluno.idade = dados.get('idade', aluno.idade)
             aluno.turma = dados.get('Turma', aluno.turma)
-            aluno.data_nascimento = dados.get('data_nascimento', aluno.data_nascimento)
+
+            try:
+                aluno.data_nascimento = dados.get('Data de nascimento')
+                aluno.idade = aluno.CalcularIdade(aluno.data_nascimento)
+            except ValueError as e:
+                return jsonify({'mensagem': str(e)}), 400
+
             aluno.nota_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
             aluno.nota_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
             aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
@@ -112,15 +126,13 @@ def deleteAluno(idAluno):
 # =================== CLASSE PROFESSOR ===================
 class Professor():
     professores = []
-    contador_id = 1
 
-    def __init__(self, nome, idade, materia, observacoes):
-        self.id = Professor.contador_id
+    def __init__(self, id, nome, idade, materia, observacoes):
+        self.id = id
         self.nome = nome
         self.idade = idade
         self.materia = materia
         self.observacoes = observacoes
-        Professor.contador_id += 1
         Professor.professores.append(self)
     
     def dici(self):
@@ -132,9 +144,9 @@ class Professor():
             "Observações": self.observacoes,
         }
 
-prof1 = Professor('Tiago', 40, 'Matemática', 'Doutor em álgebra')
-prof2 = Professor('Katherine', 35, 'Ciências', 'Especialista em biologia')
-prof3 = Professor('Matheus', 29, 'Filosofia', 'Autor de livros sobre ética')
+prof1 = Professor(1, 'Tiago', 40, 'Matemática', 'Doutor em álgebra')
+prof2 = Professor(2, 'Katherine', 35, 'Ciências', 'Especialista em biologia')
+prof3 = Professor(3, 'Matheus', 29, 'Filosofia', 'Autor de livros sobre ética')
 
 @app.route("/professores", methods=['GET'])
 def Get_professores():
@@ -160,6 +172,13 @@ def getProfessorPorID(idProfessor):
 def createProfessor():
     dados = request.json
 
+    id = dados.get("id", "")
+    if not id:
+        return jsonify({'mensagem': 'O professor necessita de um id'}), 400
+    for professor in Professor.professores:
+        if professor.id == id:
+            return jsonify({'mensagem': 'ID já utilizado'}), 400
+
     nome = dados.get("nome", "")
     if not nome:
         return jsonify({'mensagem': 'O professor necessita de um nome'}), 400
@@ -169,10 +188,11 @@ def createProfessor():
         return jsonify({'mensagem': 'O professor necessita de uma matéria'}), 400
 
     novo_professor = Professor(
-        nome=nome,
-        idade=dados.get("idade", ""),
-        materia=materia,
-        observacoes=dados.get("Observações", "")
+        id = id,
+        nome = nome,
+        idade = dados.get("idade", ""),
+        materia = materia,
+        observacoes = dados.get("Observações", "")
     )
     return jsonify(novo_professor.dici()), 201
 
@@ -206,14 +226,12 @@ def deleteProfessor(idProfessor):
 # =================== CLASSE TURMA ===================
 class Turma():
     turmas = []
-    contador_id = 1
 
-    def __init__(self, descricao, professor_id, ativo=True):
-        self.id = Turma.contador_id
+    def __init__(self, id, descricao, professor_id, ativo=True):
+        self.id = id
         self.descricao = descricao
         self.professor = self.get_professor_id(professor_id)
         self.ativo = ativo
-        Turma.contador_id += 1
         Turma.turmas.append(self)
     
     def get_professor_id(self, professor_id):
@@ -231,9 +249,9 @@ class Turma():
         }
 
 
-Turma("Turma 1A", 1)
-Turma("Turma 2B", 2)
-Turma("Turma 3C", 3)
+Turma(1,"Turma 1A", 1)
+Turma(2, "Turma 2B", 2)
+Turma(3, "Turma 3C", 3)
 
 @app.route("/turmas", methods=['GET'])
 def Get_turmas():
@@ -258,6 +276,13 @@ def getTurmaPorID(idTurma):
 def createTurma():
     dados = request.json
 
+    id = dados.get("id", "")
+    if not id:
+        return jsonify({'mensagem': 'A turma necessita de um id'}), 400
+    for turma in Turma.turmas:
+        if turma.id == id:
+            return jsonify({'mensagem': 'ID já utilizado'}), 400
+
     descricao = dados.get("Descrição", "")
     if not descricao:
         return jsonify({'mensagem': 'A turma necessita de uma descrição'}), 400
@@ -267,9 +292,10 @@ def createTurma():
         return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
 
     nova_turma = Turma(
-        descricao=descricao,
-        professor_id=dados.get('Professor', {}).get('id'),
-        ativo=ativo
+        id = id,
+        descricao = descricao,
+        professor_id = dados.get('Professor', {}).get('id'),
+        ativo = ativo
     )
 
     return jsonify(nova_turma.dici()), 201
@@ -288,6 +314,7 @@ def updateTurma(idTurma):
             if not ativo:
                 return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
             
+            turma.id = turma.id
             turma.descricao = descricao
             turma.ativo = ativo
 

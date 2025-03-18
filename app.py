@@ -99,11 +99,15 @@ def updateAluno(idAluno):
                 if "nome" not in dados or not dados["nome"].strip():
                     return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
 
+                # Verifica se 'Data de nascimento' está presente e não está vazia
+                if "Data de nascimento" not in dados or not dados["Data de nascimento"].strip():
+                    return jsonify({'mensagem': 'A data de nascimento é obrigatória'}), 400
+
                 aluno.nome = dados["nome"]
                 aluno.turma = dados.get('Turma', aluno.turma)
 
                 try:
-                    aluno.data_nascimento = dados.get('Data de nascimento', aluno.data_nascimento)
+                    aluno.data_nascimento = dados["Data de nascimento"]
                     aluno.idade = aluno.CalcularIdade(aluno.data_nascimento)
                 except ValueError as e:
                     return jsonify({'mensagem': str(e)}), 400
@@ -203,23 +207,36 @@ def createProfessor():
 
 @app.route('/professores/<int:idProfessor>', methods=['PUT'])
 def updateProfessor(idProfessor):
-    for professor in Professor.professores:
-        if professor.id == idProfessor:
-            dados = request.json
+    try:
+        for professor in Professor.professores:
+            if professor.id == idProfessor:
+                dados = request.json
+                
+                # Pegando o nome sem valor padrão
+                nome = dados.get('nome', "").strip()
+                if not nome:  # Se estiver ausente ou vazio, retorna erro
+                    return jsonify({'erro': 'O professor necessita de um nome'}), 400
 
-            # Pegando o nome sem valor padrão
-            nome = dados.get('nome', "").strip()
-            if not nome:  # Se estiver ausente ou vazio, retorna erro
-                return jsonify({'erro': 'professor sem nome'}), 400
+                # Verifica se 'Materia' está presente e não está vazia
+                materia = dados.get("Materia", "").strip()
+                if not materia:
+                    return jsonify({'mensagem': 'O professor necessita de uma matéria'}), 400
 
-            professor.nome = nome
-            professor.idade = dados.get('idade', professor.idade)
-            professor.materia = dados.get('Materia', professor.materia)
-            professor.observacoes = dados.get('Observações', professor.observacoes)
-            return jsonify(professor.dici())
-    
-    return jsonify({'mensagem': 'Professor não encontrado'}), 404
+                professor.nome = nome
+                professor.materia = materia
 
+                try:
+                    professor.data_nascimento = dados["Data de nascimento"]
+                    professor.idade = professor.CalcularIdade(professor.data_nascimento)
+                except ValueError as e:
+                    return jsonify({'mensagem': str(e)}), 400
+
+                return jsonify(professor.dici())
+
+        return jsonify({'mensagem': 'Professor não encontrado'}), 404
+
+    except Exception as e:
+        return jsonify({'mensagem': f'Erro inesperado: {str(e)}'}), 500
 
 @app.route('/professores/<int:idProfessor>', methods=['DELETE'])
 def deleteProfessor(idProfessor):

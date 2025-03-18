@@ -218,8 +218,15 @@ class TestStringMethods(unittest.TestCase):
          self.assertEqual(r_antes.json()['nome'],'lucas')
          
          # vamos fazer um PUT porque vamos alterar apenas o nome mas no ID 11
-         requests.put('http://localhost:5000/alunos/11', 
-                      json={'nome':'lucas mendes'})
+         requests.put('http://localhost:5000/alunos/11', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 11,
+            "idade": 18,
+            "nome": "lucas mendes"
+            })  
          
          #Vamos puxar e ver o novo nome, agora lucas mensdes 
          r_depois = requests.get('http://localhost:5000/alunos/11')
@@ -316,12 +323,6 @@ class TestStringMethods(unittest.TestCase):
         # Verificar se a API retorna erro 400 e a mensagem correta
         self.assertEqual(r_update.status_code, 400)
         self.assertEqual(r_update.json()['mensagem'], 'O aluno necessita de um nome')
-        
-
-
-    
-    
-     #cria alunos sem nome, o que tem que dar erro
 
     def test_008a_post_sem_nome(self):
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -456,7 +457,12 @@ class TestStringMethods(unittest.TestCase):
                     "nome": "Dunga"})
         r_antes = requests.get('http://localhost:5000/professores/10')
         self.assertEqual(r_antes.json()['nome'],'Dunga')
-        requests.put('http://localhost:5000/professores/10', json={'nome':'Dunga mendes'})
+        requests.put('http://localhost:5000/professores/10',json={
+                    "Materia": "Matemática",
+                    "Observações": "Doutor em álgebra",
+                    "id": 10,
+                    "idade": 40,
+                    "nome": "Dunga mendes"})
         r_depois = requests.get('http://localhost:5000/professores/10')
         self.assertEqual(r_depois.json()['nome'],'Dunga mendes')
 
@@ -529,7 +535,7 @@ class TestStringMethods(unittest.TestCase):
                     "idade": 40,
                     })
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['erro'], 'professor sem nome')
+        self.assertEqual(r.json()['erro'],  'O professor necessita de um nome')
 
     def test_109_nao_confundir_professor_e_aluno(self):
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -551,33 +557,157 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(r_lista.json()),2)
         r_lista_alunos = requests.get('http://localhost:5000/alunos')
         self.assertEqual(len(r_lista_alunos.json()),0)
-   #Iniciar estes testes novos 
+
    #ALUNO
     def test_008c_aluno_sem_dataNasci_post(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code,200)
+        #tentei criar um aluno, sem enviar a data nascimento
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 11,
+            "idade": 18,
+            "Nome": "Lulu"
+            })
+        self.assertEqual(r.status_code,400)
 
     def test_008d_aluno_sem_dataNasc_put(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        # Criar um aluno válido primeiro
+        r_create = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 14,
+            "idade": 18,
+            "nome": "Tiago"
+        })
+        self.assertEqual(r_create.status_code, 201)  # API retorna 201 ao criar um aluno
+       
+        # Agora Realizar um put sem data
+        r_update = requests.put('http://localhost:5000/alunos/14', json={  
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 14,
+            "idade": 18,
+            "nome": "Tiago"
+        })
+        self.assertEqual(r_update.status_code, 400)
+        self.assertEqual(r_update.json()['mensagem'], 'A data de nascimento é obrigatória')
+        
     #PROFESSOR
     def test_008e_professor_sem_materia_post(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+        r =  requests.post('http://localhost:5000/professores',json={
+                    "Observações": "Doutor em álgebra",
+                    "id": 1,
+                    "idade": 40,
+                    "nome": "durval"})
+        self.assertEqual(r.status_code,400)
     
     def test_008f_professor_sem_materia_put(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        
+        r = requests.post('http://localhost:5000/professores',json={
+                    "Materia": "Matemática",
+                    "Observações": "Doutor em álgebra",
+                    "id": 4,
+                    "idade": 40,
+                    "nome": "fernando"})
+        self.assertEqual(r.status_code, 201)  # API retorna 201 ao criar um aluno
+       
+        
+        r_update = requests.put('http://localhost:5000/professores/4',json={
+                    "Observações": "Doutor em álgebra",
+                    "id": 4,
+                    "idade": 40,
+                    "nome": "fernando"})
+        self.assertEqual(r_update.status_code, 400)
+        self.assertEqual(r_update.json()['mensagem'], 'O professor necessita de uma matéria')
     #TURMA
     def test_008g_turma_sem_descrisao_post(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+
+        r = requests.post('http://localhost:5000/turmas',json={
+                "Ativo": True,
+                "Professor": "",
+                "Materia": "Matemática",
+                "Observações": "Doutor em álgebra",
+                "idade": 40,
+                "id": 1,
+                "nome": "twatw"})
+        self.assertEqual(r.status_code, 400)
+
    
     def test_008h_turma_sem_descrisao_put(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        # Criando uma turma válida primeiro
+        r_create = requests.post('http://localhost:5000/turmas', json={
+            "id": 1,
+            "Descrição": "Turma de matemática",
+            "Ativo": True,
+            "Professor": {"id": 5}
+        })
+        self.assertEqual(r_create.status_code, 201)
+
+        # Tentando atualizar sem descrição
+        r_update = requests.put('http://localhost:5000/turmas/1', json={
+            "Ativo": True,
+            "Professor": {"id": 5}
+            # "Descrição" foi omitida de propósito para testar a validação
+        })
+        
+        self.assertEqual(r_update.status_code, 400)  # Esperado erro 400
+        self.assertIn(r_update.json()["mensagem"], "A turma necessita de uma descrição")  # Mensagem esperada
+
 
     def test_008i_turma_sem_ativo_post(self):
-        pass
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
 
-    def test_008i_turma_sem_ativo_put(self):
-        pass
+        # Criando uma turma válida primeiro
+        r = requests.post('http://localhost:5000/turmas', json={
+            "id": 1,
+            "Descrição": "Turma 2C",
+            "Professor": {"id": 5}
+        })
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.json()['mensagem'], 'A turma deve estar ativa ou inativa') 
 
-    
+    def test_008j_turma_sem_ativo_put(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        # Criando uma turma válida primeiro
+        r = requests.post('http://localhost:5000/turmas', json={
+            "id": 1,
+            "Descrição": "Turma de matemática",
+            "Ativo": True,
+            "Professor": {"id": 5}
+        })
+        self.assertEqual(r_reset.status_code, 200)
+        
+        
+        r_update = requests.put('http://localhost:5000/turmas/1', json={
+             "id": 1,
+            "Descrição": "Turma de matemática",
+            "Professor": {"id": 5}
+            })
+        
+        self.assertEqual(r_update.status_code, 400)  # Esperado erro 400
+        self.assertIn(r_update.json()["mensagem"], 'A turma deve estar ativa ou inativa')  # Mensagem esperada
+        
+        
 
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)

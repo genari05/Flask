@@ -409,8 +409,8 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(r.status_code, 404)  # Alterado para 404
         self.assertEqual(r.json()['mensagem'], 'Professor não encontrado')
 
-
-    '''def test_107_criar_com_id_ja_existente(self):
+    #ESTA MERDA NÂO TAVA INDO 
+    def test_107_criar_com_id_ja_existente_professor(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
         r=  requests.post('http://localhost:5000/professores',json={
@@ -427,9 +427,9 @@ class TestStringMethods(unittest.TestCase):
                     "idade": 40,
                     "nome": "durval"})
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['erro'],'id ja utilizada')'''
+        self.assertEqual(r.json()['erro'],'id ja utilizada')
 
-    '''def test_108_post_ou_put_sem_nome(self):
+    def test_108_post_ou_put_sem_nome(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
         r=  requests.post('http://localhost:5000/professores',json={
@@ -454,9 +454,9 @@ class TestStringMethods(unittest.TestCase):
                     "idade": 40,
                     })
         self.assertEqual(r.status_code,400)
-        self.assertEqual(r.json()['erro'],'professor sem nome')'''
+        self.assertEqual(r.json()['erro'],'professor sem nome')
 
-    '''def test_109_nao_confundir_professor_e_aluno(self):
+    def test_109_nao_confundir_professor_e_aluno(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         r =  requests.post('http://localhost:5000/professores',json={
                     "Materia": "Matemática",
@@ -475,9 +475,9 @@ class TestStringMethods(unittest.TestCase):
         r_lista = requests.get('http://localhost:5000/professores')
         self.assertEqual(len(r_lista.json()),2)
         r_lista_alunos = requests.get('http://localhost:5000/alunos')
-        self.assertEqual(len(r_lista_alunos.json()),0)'''
+        self.assertEqual(len(r_lista_alunos.json()),0)
 
-    '''def test_008b_put_sem_nome(self):
+    def test_008b_put_sem_nome(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code, 200)
 
@@ -504,13 +504,13 @@ class TestStringMethods(unittest.TestCase):
         
         # Verificar se a API retorna erro 400 e a mensagem correta
         self.assertEqual(r_update.status_code, 400)
-        self.assertEqual(r_update.json()['mensagem'], 'O aluno necessita de um nome')'''
+        self.assertEqual(r_update.json()['mensagem'], 'O aluno necessita de um nome')
         
 
 
     
      #cria alunos sem nome, o que tem que dar erro
-    '''def test_008a_post_sem_nome(self):
+    def test_008a_post_sem_nome(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
 
@@ -525,20 +525,20 @@ class TestStringMethods(unittest.TestCase):
             })
         self.assertEqual(r.status_code,400)
         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
-    '''
+    
     #tenta editar alunos sem passar nome, o que também
     #tem que dar erro (se vc nao mudar o nome, vai mudar o que?)
     
     
 
-    #tento criar 2 caras com a  mesma id
-    '''def test_007_criar_com_id_ja_existente(self):
+    
+    def test_007_criar_com_id_ja_existente(self):
 
-        #dou reseta e confiro que deu certo
+        
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
 
-        #crio o usuario bond e confiro
+        
         r = requests.post('http://localhost:5000/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
@@ -548,7 +548,7 @@ class TestStringMethods(unittest.TestCase):
             "idade": 18,
             "nome": "lucas"
             })  
-        #tento usar o mesmo id para outro usuário
+        
         r = requests.post('http://localhost:5000/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
@@ -558,10 +558,9 @@ class TestStringMethods(unittest.TestCase):
             "idade": 18,
             "nome": "lucas"
             })  
-        # o erro é muito parecido com o do teste anterior
         self.assertEqual(r.status_code,400)
         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
-     '''
+    
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)
         unittest.TextTestRunner(verbosity=2,failfast=True).run(suite)

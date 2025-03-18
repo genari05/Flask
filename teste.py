@@ -95,8 +95,7 @@ class TestStringMethods(unittest.TestCase):
             self.fail('aluno Samuel nao apareceu na lista de alunos')
         if not achei_Davi:
             self.fail('aluno Davi nao apareceu na lista de alunos')
-    
-    
+       
     def teste_002_aluno_por_id(self):
         #Criar um aluno marcos com id 20 
         r = requests.post('http://localhost:5000/alunos', json={  
@@ -115,8 +114,6 @@ class TestStringMethods(unittest.TestCase):
         self.assertIn('nome',dic_retornado)
         self.assertEqual(dic_retornado['nome'], 'mario')
         
-    
-
     def teste_003_reseta(self):
          r = requests.post('http://localhost:5000/alunos', json={  
             "Data de nascimento": "2005-05-05",
@@ -201,8 +198,7 @@ class TestStringMethods(unittest.TestCase):
             pass
         else:
             self.fail("voce parece ter deletado o aluno errado!")
-    
-            
+              
     def teste_005_editar(self):
         #Reseta
          r_reseta = requests.post('http://localhost:5000/reseta')
@@ -242,8 +238,7 @@ class TestStringMethods(unittest.TestCase):
         #qual a resposta que a linha abaixo pede?
         #um json, com o dicionario {"erro":"aluno nao encontrado"}
          self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
-         
-         
+                
     def test_006b_id_inexistente_no_get(self):
         #reseto
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -263,7 +258,86 @@ class TestStringMethods(unittest.TestCase):
         r = requests.delete('http://localhost:5000/alunos/15')
         self.assertIn(r.status_code,[400,404])
         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+   
+    def test_007b_criar_com_id_ja_existente(self):
+
+        
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code,200)
+
+        
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 12,
+            "idade": 18,
+            "nome": "lucas"
+            })  
+        
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 12,
+            "idade": 18,
+            "nome": "lucas"
+            })  
+        self.assertEqual(r.status_code,400)
+
+    def test_008b_put_sem_nome(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        # Criar um aluno válido primeiro
+        r_create = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 13,
+            "idade": 18,
+            "nome": "Tiago"
+        })
+        self.assertEqual(r_create.status_code, 201)  # API retorna 201 ao criar um aluno
+
+        # Tentar editar o aluno sem enviar nome
+        r_update = requests.put('http://localhost:5000/alunos/13', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id":13,
+            "idade": 19
+        })
+        
+        # Verificar se a API retorna erro 400 e a mensagem correta
+        self.assertEqual(r_update.status_code, 400)
+        self.assertEqual(r_update.json()['mensagem'], 'O aluno necessita de um nome')
+        
+
+
     
+    
+     #cria alunos sem nome, o que tem que dar erro
+
+    def test_008a_post_sem_nome(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code,200)
+
+        #tentei criar um aluno, sem enviar um nome
+        r = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 11,
+            "idade": 18,
+            })
+        self.assertEqual(r.status_code,400)
+        
     def test_100_professores_retorna_lista(self):
         r = requests.get('http://localhost:5000/professores')
         self.assertEqual(type(r.json()),type([]))
@@ -298,6 +372,7 @@ class TestStringMethods(unittest.TestCase):
         
         
         #'Matheus', 29, 'Filosofia', 'Autor de livros sobre ética'
+   
     def test_101_adiciona_professores(self):
         r = requests.post('http://localhost:5000/professores',json={
                     "Materia": "Matemática",
@@ -409,7 +484,6 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(r.status_code, 404)  # Alterado para 404
         self.assertEqual(r.json()['mensagem'], 'Professor não encontrado')
 
-    #ESTA MERDA NÂO TAVA INDO 
     def test_107_criar_com_id_ja_existente_professor(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
@@ -428,8 +502,7 @@ class TestStringMethods(unittest.TestCase):
                     "nome": "durval"})
         self.assertEqual(r.status_code,400)
         self.assertEqual(r.json()['mensagem'], 'ID já utilizado')
-
-
+    
     def test_108_post_ou_put_sem_nome(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code,200)
@@ -478,91 +551,34 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(len(r_lista.json()),2)
         r_lista_alunos = requests.get('http://localhost:5000/alunos')
         self.assertEqual(len(r_lista_alunos.json()),0)
+   #Iniciar estes testes novos 
+   #ALUNO
+    def test_008c_aluno_sem_dataNasci_post(self):
+        pass
 
-    def test_008b_put_sem_nome(self):
-        r_reset = requests.post('http://localhost:5000/reseta')
-        self.assertEqual(r_reset.status_code, 200)
+    def test_008d_aluno_sem_dataNasc_put(self):
+        pass
+    #PROFESSOR
+    def test_008e_professor_sem_materia_post(self):
+        pass
+    
+    def test_008f_professor_sem_materia_put(self):
+        pass
+    #TURMA
+    def test_008g_turma_sem_descrisao_post(self):
+        pass
+   
+    def test_008h_turma_sem_descrisao_put(self):
+        pass
 
-        # Criar um aluno válido primeiro
-        r_create = requests.post('http://localhost:5000/alunos', json={  
-            "Data de nascimento": "2005-05-05",
-            "Nota do primeiro semestre": 10,
-            "Nota do segundo semestre": 10,
-            "Turma": "1C",
-            "id": 13,
-            "idade": 18,
-            "nome": "Tiago"
-        })
-        self.assertEqual(r_create.status_code, 201)  # API retorna 201 ao criar um aluno
+    def test_008i_turma_sem_ativo_post(self):
+        pass
 
-        # Tentar editar o aluno sem enviar nome
-        r_update = requests.put('http://localhost:5000/alunos/13', json={  
-            "Data de nascimento": "2005-05-05",
-            "Nota do primeiro semestre": 10,
-            "Nota do segundo semestre": 10,
-            "Turma": "1C",
-            "id":13,
-            "idade": 19
-        })
-        
-        # Verificar se a API retorna erro 400 e a mensagem correta
-        self.assertEqual(r_update.status_code, 400)
-        self.assertEqual(r_update.json()['mensagem'], 'O aluno necessita de um nome')
-        
-
+    def test_008i_turma_sem_ativo_put(self):
+        pass
 
     
-     #cria alunos sem nome, o que tem que dar erro
-    def test_008a_post_sem_nome(self):
-        r_reset = requests.post('http://localhost:5000/reseta')
-        self.assertEqual(r_reset.status_code,200)
 
-        #tentei criar um aluno, sem enviar um nome
-        r = requests.post('http://localhost:5000/alunos', json={  
-            "Data de nascimento": "2005-05-05",
-            "Nota do primeiro semestre": 10,
-            "Nota do segundo semestre": 10,
-            "Turma": "1C",
-            "id": 11,
-            "idade": 18,
-            })
-        self.assertEqual(r.status_code,400)
-
-    
-    #tenta editar alunos sem passar nome, o que também
-    #tem que dar erro (se vc nao mudar o nome, vai mudar o que?)
-    
-    
-
-    
-    def test_007_criar_com_id_ja_existente(self):
-
-        
-        r_reset = requests.post('http://localhost:5000/reseta')
-        self.assertEqual(r_reset.status_code,200)
-
-        
-        r = requests.post('http://localhost:5000/alunos', json={  
-            "Data de nascimento": "2005-05-05",
-            "Nota do primeiro semestre": 10,
-            "Nota do segundo semestre": 10,
-            "Turma": "1C",
-            "id": 12,
-            "idade": 18,
-            "nome": "lucas"
-            })  
-        
-        r = requests.post('http://localhost:5000/alunos', json={  
-            "Data de nascimento": "2005-05-05",
-            "Nota do primeiro semestre": 10,
-            "Nota do segundo semestre": 10,
-            "Turma": "1C",
-            "id": 12,
-            "idade": 18,
-            "nome": "lucas"
-            })  
-        self.assertEqual(r.status_code,400)
-    
 def runTests():
         suite = unittest.defaultTestLoader.loadTestsFromTestCase(TestStringMethods)
         unittest.TextTestRunner(verbosity=2,failfast=True).run(suite)

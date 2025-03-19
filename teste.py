@@ -707,6 +707,54 @@ class TestStringMethods(unittest.TestCase):
         self.assertEqual(r_update.status_code, 400)  # Esperado erro 400
         self.assertIn(r_update.json()["mensagem"], 'A turma deve estar ativa ou inativa')  # Mensagem esperada
         
+    def test_008m_turma_com_id_duplicado(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        r_create = requests.post('http://localhost:5000/turmas', json={
+            "id": 5,
+            "Descrição": "Turma de História",
+            "Ativo": True,
+            "Professor": {"id": 8}
+        })
+        self.assertEqual(r_create.status_code, 201)
+
+        r_duplicate = requests.post('http://localhost:5000/turmas', json={
+            "id": 5,
+            "Descrição": "Turma de História Moderna",
+            "Ativo": True,
+            "Professor": {"id": 9}
+        })
+        
+        self.assertEqual(r_duplicate.status_code, 400)
+        self.assertEqual(r_duplicate.json()['mensagem'], 'ID já utilizado')
+
+    def test_008n_turma_id_invalido(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        r = requests.post('http://localhost:5000/turmas', json={
+            "id": "abc",
+            "Descrição": "Turma de Filosofia",
+            "Ativo": True,
+            "Professor": {"id": 10}
+        })
+        
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.json()['mensagem'], 'ID da turma deve ser numérico')
+
+    def test_008o_turma_sem_id_post(self):
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        r = requests.post('http://localhost:5000/turmas', json={
+            "Descrição": "Turma de Inglês",
+            "Ativo": True,
+            "Professor": {"id": 11}
+        })
+        
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.json()['mensagem'], 'A turma necessita de um id')
         
 
 def runTests():

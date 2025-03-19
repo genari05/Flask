@@ -303,6 +303,8 @@ def createTurma():
     id = dados.get("id", "")
     if not id:
         return jsonify({'mensagem': 'A turma necessita de um id'}), 400
+    if not isinstance(id, int) or id <= 0:
+        return jsonify({'mensagem': 'ID da turma deve ser numérico'}), 400
     for turma in Turma.turmas:
         if turma.id == id:
             return jsonify({'mensagem': 'ID já utilizado'}), 400
@@ -312,14 +314,14 @@ def createTurma():
         return jsonify({'mensagem': 'A turma necessita de uma descrição'}), 400
     
     ativo = dados.get("Ativo", "")
-    if not ativo:
+    if not isinstance(ativo, bool):
         return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
 
     nova_turma = Turma(
-        id = id,
-        descricao = descricao,
-        professor_id = dados.get('Professor', {}).get('id'),
-        ativo = ativo
+        id=id,
+        descricao=descricao,
+        professor_id=dados.get('Professor', {}).get('id'),
+        ativo=ativo
     )
 
     return jsonify(nova_turma.dici()), 201

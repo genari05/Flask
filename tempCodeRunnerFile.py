@@ -1,1 +1,0 @@
-'O professor necessita de uma matéria'

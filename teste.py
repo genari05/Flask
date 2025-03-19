@@ -600,7 +600,37 @@ class TestStringMethods(unittest.TestCase):
         })
         self.assertEqual(r_update.status_code, 400)
         self.assertEqual(r_update.json()['mensagem'], 'A data de nascimento é obrigatória')
-        
+    
+    def test_008k_criar_com_id_ja_existente(self):
+
+        # Resetar o estado da API para garantir um ambiente limpo
+        r_reset = requests.post('http://localhost:5000/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        # Criar um aluno com ID 12
+        r1 = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 12,
+            "idade": 18,
+            "nome": "Lucas"
+        })  
+        self.assertEqual(r1.status_code, 201)  # Esperado sucesso na criação
+
+        # Tentar criar outro aluno com o mesmo ID 12
+        r2 = requests.post('http://localhost:5000/alunos', json={  
+            "Data de nascimento": "2005-05-05",
+            "Nota do primeiro semestre": 10,
+            "Nota do segundo semestre": 10,
+            "Turma": "1C",
+            "id": 12,
+            "idade": 18,
+            "nome": "Lucas"
+        })  
+        self.assertEqual(r2.status_code, 400)  # Esperado erro de ID duplicado
+        self.assertEqual(r2.json(), {'mensagem': 'ID já utilizado'}) 
     #PROFESSOR
     def test_008e_professor_sem_materia_post(self):
         r_reset = requests.post('http://localhost:5000/reseta')
@@ -646,7 +676,6 @@ class TestStringMethods(unittest.TestCase):
                 "nome": "twatw"})
         self.assertEqual(r.status_code, 400)
 
-   
     def test_008h_turma_sem_descrisao_put(self):
         r_reset = requests.post('http://localhost:5000/reseta')
         self.assertEqual(r_reset.status_code, 200)
@@ -669,7 +698,6 @@ class TestStringMethods(unittest.TestCase):
         
         self.assertEqual(r_update.status_code, 400)  # Esperado erro 400
         self.assertIn(r_update.json()["mensagem"], "A turma necessita de uma descrição")  # Mensagem esperada
-
 
     def test_008i_turma_sem_ativo_post(self):
         r_reset = requests.post('http://localhost:5000/reseta')

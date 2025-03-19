@@ -62,6 +62,8 @@ def createAluno():
     id = dados.get("id", "")
     if not id:
         return jsonify({'mensagem': 'O aluno necessita de um id'}), 400
+    if not isinstance(id, int) or id <= 0:
+        return jsonify({'mensagem': 'ID inválido. Deve ser um número inteiro positivo'}), 400
     for aluno in Aluno.alunos:
         if aluno.id == id:
             return jsonify({'mensagem': 'ID já utilizado'}), 400

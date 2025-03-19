@@ -8,6 +8,11 @@ class Aluno():
     alunos = []
 
     def __init__(self, id, nome, turma_id, data_nascimento, nota_semestre_1, nota_semestre_2):
+        if not isinstance(nome, str) or len(nome) > 100:
+            raise ValueError("Nome inválido. Deve ser uma string de até 100 caracteres")
+        if not isinstance(nota_semestre_1, (int, float)) or not isinstance(nota_semestre_2, (int, float)):
+            raise ValueError("Notas inválidas. Devem ser números float")
+        
         self.id = id
         self.nome = nome
         self.idade = self.CalcularIdade(data_nascimento)
@@ -75,15 +80,20 @@ def createAluno():
     data_nascimento = dados.get("Data de nascimento", "")
     if not data_nascimento:
         return jsonify({'mensagem': 'O aluno necessita ter data de nascimento'}), 400
+    
+    nota_semestre_1 = dados.get("Nota do primeiro semestre", 0)
+    nota_semestre_2 = dados.get("Nota do segundo semestre", 0)
+    if not isinstance(nota_semestre_1, (int, float)) or not isinstance(nota_semestre_2, (int, float)):
+        return jsonify({'mensagem': 'Notas inválidas, passe números'}), 400
 
     try:
         novo_aluno = Aluno(
-            id=id,
-            nome=nome,
-            turma_id=dados["Turma"],
-            data_nascimento=data_nascimento,
-            nota_semestre_1=dados.get("Nota do primeiro semestre", 0),
-            nota_semestre_2=dados.get("Nota do segundo semestre", 0)
+            id = id,
+            nome = nome,
+            turma_id = dados.get("Turma", ""),
+            data_nascimento = data_nascimento,
+            nota_semestre_1 = nota_semestre_1,
+            nota_semestre_2 = nota_semestre_2
         )
     except ValueError as e:
         return jsonify({'mensagem': str(e)}), 400
@@ -97,11 +107,9 @@ def updateAluno(idAluno):
             if aluno.id == idAluno:
                 dados = request.json
 
-                # Verifica se 'nome' está presente na requisição, mesmo que esteja vazio
                 if "nome" not in dados or not dados["nome"].strip():
                     return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
 
-                # Verifica se 'Data de nascimento' está presente e não está vazia
                 if "Data de nascimento" not in dados or not dados["Data de nascimento"].strip():
                     return jsonify({'mensagem': 'A data de nascimento é obrigatória'}), 400
 
@@ -114,8 +122,13 @@ def updateAluno(idAluno):
                 except ValueError as e:
                     return jsonify({'mensagem': str(e)}), 400
 
-                aluno.nota_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
-                aluno.nota_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
+                nota_semestre_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
+                nota_semestre_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
+                if not isinstance(nota_semestre_1, (int, float)) or not isinstance(nota_semestre_2, (int, float)):
+                    return jsonify({'mensagem': 'Notas inválidas, passe números'}), 400
+                
+                aluno.nota_1 = nota_semestre_1
+                aluno.nota_2 = nota_semestre_2
                 aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
                 
                 return jsonify(aluno.dici())
@@ -186,6 +199,8 @@ def createProfessor():
     id = dados.get("id", "")
     if not id:
         return jsonify({'mensagem': 'O professor necessita de um id'}), 400
+    if not isinstance(id, int) or id <= 0:
+        return jsonify({'mensagem': 'ID inválido. Deve ser um número inteiro positivo'}), 400
     for professor in Professor.professores:
         if professor.id == id:
             return jsonify({'mensagem': 'ID já utilizado'}), 400
@@ -214,12 +229,10 @@ def updateProfessor(idProfessor):
             if professor.id == idProfessor:
                 dados = request.json
                 
-                # Pegando o nome sem valor padrão
                 nome = dados.get('nome', "").strip()
-                if not nome:  # Se estiver ausente ou vazio, retorna erro
+                if not nome: 
                     return jsonify({'erro': 'O professor necessita de um nome'}), 400
 
-                # Verifica se 'Materia' está presente e não está vazia
                 materia = dados.get("Materia", "").strip()
                 if not materia:
                     return jsonify({'mensagem': 'O professor necessita de uma matéria'}), 400

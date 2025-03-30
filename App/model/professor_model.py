@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from flask import Flask, jsonify, request
 
 class Professor():
@@ -25,14 +25,8 @@ prof1 = Professor(1, 'Tiago', 40, 'Matemática', 'Doutor em álgebra')
 prof2 = Professor(2, 'Katherine', 35, 'Ciências', 'Especialista em biologia')
 prof3 = Professor(3, 'Matheus', 29, 'Filosofia', 'Autor de livros sobre ética')
 
-
-
-class ProfessorNaoEncontrado(Exception):
-    pass
-
 def Get_professores():
     return jsonify([professor.dici() for professor in Professor.professores])
-
 
 def getProfessorPorID(idProfessor):
     for professor in Professor.professores:
@@ -48,7 +42,6 @@ def getProfessorPorID(idProfessor):
             )
         
     return jsonify({'mensagem': 'Professor não encontrado'}), 404
-
 
 def createProfessor():
     dados = request.json
@@ -78,7 +71,6 @@ def createProfessor():
         observacoes = dados.get("Observações", "")
     )
     return jsonify(novo_professor.dici()), 201
-
 
 def updateProfessor(idProfessor):
     try:
@@ -110,7 +102,6 @@ def updateProfessor(idProfessor):
     except Exception as e:
         return jsonify({'mensagem': f'Erro inesperado: {str(e)}'}), 500
 
-
 def deleteProfessor(idProfessor):
     for professor in Professor.professores:
         if professor.id == idProfessor:
@@ -118,4 +109,3 @@ def deleteProfessor(idProfessor):
             return jsonify({'mensagem': 'Professor deletado'})
         
     return jsonify({'mensagem': 'Professor não encontrado'}), 404
-

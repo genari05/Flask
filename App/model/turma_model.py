@@ -13,7 +13,7 @@ class Turma():
         Turma.turmas.append(self)
     
     def get_professor_id(self, professor_id):
-        for professor in modelProfessor.professores:
+        for professor in modelProfessor.Professor.professores:  # Acessando a lista 'professores' da classe Professor
             if professor.id == professor_id:
                 return professor.dici()
         return {"mensagem": "Professor não encontrado"}
@@ -31,13 +31,8 @@ Turma(1,"Turma 1A", 1)
 Turma(2, "Turma 2B", 2)
 Turma(3, "Turma 3C", 3)
 
-
-class TurmaNaoEncontrado(Exception):
-    pass
-
 def Get_turmas():
     return jsonify([turma.dici() for turma in Turma.turmas])
-
 
 def getTurmaPorID(idTurma):
     for turma in Turma.turmas:
@@ -52,7 +47,6 @@ def getTurmaPorID(idTurma):
             )
 
     return jsonify({'mensagem': 'Turma não encontrada'}), 404
-
 
 def createTurma():
     dados = request.json
@@ -82,7 +76,6 @@ def createTurma():
     )
 
     return jsonify(nova_turma.dici()), 201
-
 
 def updateTurma(idTurma):
     for turma in Turma.turmas:
@@ -117,4 +110,3 @@ def deleteTurma(idTurma):
             return jsonify({'mensagem': 'Turma deletada'})
         
     return jsonify({'mensagem': 'Turma não encontrada'}), 404
-

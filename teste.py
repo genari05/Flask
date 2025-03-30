@@ -1,6 +1,15 @@
 import requests
 import unittest
+import sys
+import os
+# Adiciona o diretório de 'App' ao sys.path para permitir a importação
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'App')))
+
+# Agora, importa o 'app' do Flask que está no app.py
 from App.app import app
+
+
+
 
 class TestStringMethods(unittest.TestCase):
     

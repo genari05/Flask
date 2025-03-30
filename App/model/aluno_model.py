@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from flask import Flask, jsonify, request
 
 class Aluno():
@@ -45,7 +45,6 @@ class Aluno():
 Aluno(1, "João Silva", "1A", "2004-05-10", 7.5, 8.0)
 Aluno(2, "Maria Souza", "2B", "2002-09-15", 6.0, 9.5)
 Aluno(3, "Carlos Oliveira", "1A", "2005-02-20", 8.5, 7.0)
-
 
 
 class AlunoNaoEncontrado(Exception):
@@ -108,33 +107,46 @@ def updateAluno(idAluno):
             if aluno.id == idAluno:
                 dados = request.json
 
-                if "nome" not in dados or not dados["nome"].strip():
+                # Validações de campos obrigatórios e não vazios
+                nome = dados.get("nome", "").strip()
+                if not nome:
                     return jsonify({'mensagem': 'O aluno necessita de um nome'}), 400
 
-                if "Data de nascimento" not in dados or not dados["Data de nascimento"].strip():
+                data_nascimento = dados.get("Data de nascimento", "").strip()
+                if not data_nascimento:
                     return jsonify({'mensagem': 'A data de nascimento é obrigatória'}), 400
 
-                aluno.nome = dados["nome"]
+                # Atualizando o nome e turma
+                aluno.nome = nome
                 aluno.turma = dados.get('Turma', aluno.turma)
 
+                # Tentativa de cálculo da idade
                 try:
-                    aluno.data_nascimento = dados["Data de nascimento"]
+                    aluno.data_nascimento = data_nascimento
                     aluno.idade = aluno.CalcularIdade(aluno.data_nascimento)
                 except ValueError as e:
-                    return jsonify({'mensagem': str(e)}), 400
+                    return jsonify({'mensagem': f'O formato da data de nascimento está errado: {str(e)}'}), 400
 
-                nota_semestre_1 = dados.get('Nota do primeiro semestre', aluno.nota_1)
-                nota_semestre_2 = dados.get('Nota do segundo semestre', aluno.nota_2)
-                if not isinstance(nota_semestre_1, (int, float)) or not isinstance(nota_semestre_2, (int, float)):
+                # Verificando e validando as notas
+                try:
+                    nota_semestre_1 = float(dados.get('Nota do primeiro semestre', aluno.nota_1))
+                    nota_semestre_2 = float(dados.get('Nota do segundo semestre', aluno.nota_2))
+
+                    if not (0 <= nota_semestre_1 <= 10) or not (0 <= nota_semestre_2 <= 10):
+                        return jsonify({'mensagem': 'As notas devem estar entre 0 e 10'}), 400
+
+                    aluno.nota_1 = nota_semestre_1
+                    aluno.nota_2 = nota_semestre_2
+                    aluno.media_final = (nota_semestre_1 + nota_semestre_2) / 2
+                except ValueError:
                     return jsonify({'mensagem': 'Notas inválidas, passe números'}), 400
-                
-                aluno.nota_1 = nota_semestre_1
-                aluno.nota_2 = nota_semestre_2
-                aluno.media_final = (aluno.nota_1 + aluno.nota_2) / 2
-                
+
                 return jsonify(aluno.dici())
 
         return jsonify({'mensagem': 'Aluno não encontrado'}), 404
+
+    except Exception as e:
+        return jsonify({'mensagem': f'Erro inesperado: {str(e)}'}), 500
 
     except Exception as e:
         return jsonify({'mensagem': f'Erro inesperado: {str(e)}'}), 500

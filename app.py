@@ -12,7 +12,7 @@ app.register_blueprint(Alunos_Blueprint)
 app.register_blueprint(Professor_Blueprint)
 # =================== ROUTES TURMA ===================
 app.register_blueprint(Turma_Blueprint)
-
+# =================== ROUTES RESETA ===================
 app.register_blueprint(Reseta_Blueprint)
 
 if __name__ == '__main__':

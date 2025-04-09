@@ -2,6 +2,7 @@ from config import app
 from flask import Flask,Blueprint
 from controller.aluno import Alunos_Blueprint
 from controller.professor import Professor_Blueprint
+from controller.reseta import Reseta_Blueprint
 from controller.turma import Turma_Blueprint
 
 
@@ -11,6 +12,8 @@ app.register_blueprint(Alunos_Blueprint)
 app.register_blueprint(Professor_Blueprint)
 # =================== ROUTES TURMA ===================
 app.register_blueprint(Turma_Blueprint)
+
+app.register_blueprint(Reseta_Blueprint)
 
 if __name__ == '__main__':
     app.run(

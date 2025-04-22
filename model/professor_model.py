@@ -1,8 +1,14 @@
-from datetime import datetime
 from flask import Flask, jsonify, request
+from config import db
 
-class Professor():
-    professores = []
+class Professor(db.Model):
+    __tablename__ = "Professor"
+
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100))
+    idade = db.Column(db.Integer)
+    materia = db.Column(db.String(40))
+    observacoes = db.Column(db.String(50))
 
     def __init__(self, id, nome, idade, materia, observacoes):
         self.id = id
@@ -10,7 +16,6 @@ class Professor():
         self.idade = idade
         self.materia = materia
         self.observacoes = observacoes
-        Professor.professores.append(self)
     
     def dici(self):
         return {
@@ -21,25 +26,22 @@ class Professor():
             "Observações": self.observacoes,
         }
 
-prof1 = Professor(1, 'Tiago', 40, 'Matemática', 'Doutor em álgebra')
-prof2 = Professor(2, 'Katherine', 35, 'Ciências', 'Especialista em biologia')
-prof3 = Professor(3, 'Matheus', 29, 'Filosofia', 'Autor de livros sobre ética')
-
 def Get_professores():
-    return jsonify([professor.dici() for professor in Professor.professores])
+    professores = Professor.query.all()
+    return jsonify([professor.dici() for professor in professores])
 
 def getProfessorPorID(idProfessor):
-    for professor in Professor.professores:
-        if professor.id == idProfessor:
-            return jsonify(
-                {
-                    "id": professor.id,
-                    "nome": professor.nome,
-                    "idade": professor.idade,
-                    "Materia": professor.materia,
-                    "Observações": professor.observacoes,
-                }
-            )
+    professor = Professor.query.get(idProfessor)
+    if professor:
+        return jsonify(
+            {
+                "id": professor.id,
+                "nome": professor.nome,
+                "idade": professor.idade,
+                "Materia": professor.materia,
+                "Observações": professor.observacoes,
+            }
+        )
         
     return jsonify({'mensagem': 'Professor não encontrado'}), 404
 
@@ -51,9 +53,8 @@ def createProfessor():
         return jsonify({'mensagem': 'O professor necessita de um id'}), 400
     if not isinstance(id, int) or id <= 0:
         return jsonify({'mensagem': 'ID inválido. Deve ser um número inteiro positivo'}), 400
-    for professor in Professor.professores:
-        if professor.id == id:
-            return jsonify({'mensagem': 'ID já utilizado'}), 400
+    if Professor.query.get(id):
+        return jsonify({'mensagem': 'ID já utilizado'}), 400
 
     nome = dados.get("nome", "")
     if not nome:
@@ -70,32 +71,31 @@ def createProfessor():
         materia = materia,
         observacoes = dados.get("Observações", "")
     )
+    db.session.add(novo_professor)
+    db.session.commit()
     return jsonify(novo_professor.dici()), 201
 
 def updateProfessor(idProfessor):
     try:
-        for professor in Professor.professores:
-            if professor.id == idProfessor:
-                dados = request.json
+        professor = Professor.query.get(idProfessor)
+        if professor:
+            dados = request.json
                 
-                nome = dados.get('nome', "").strip()
-                if not nome: 
-                    return jsonify({'erro': 'O professor necessita de um nome'}), 400
+            nome = dados.get('nome', "").strip()
+            if not nome: 
+                return jsonify({'erro': 'O professor necessita de um nome'}), 400
 
-                materia = dados.get("Materia", "").strip()
-                if not materia:
-                    return jsonify({'mensagem': 'O professor necessita de uma matéria'}), 400
+            materia = dados.get("Materia", "").strip()
+            if not materia:
+                return jsonify({'mensagem': 'O professor necessita de uma matéria'}), 400
 
-                professor.nome = nome
-                professor.materia = materia
+            professor.nome = nome
+            professor.idade = dados.get("idade", "")
+            professor.materia = materia
+            professor.observacoes = dados.get("Observações", "")
 
-                try:
-                    professor.data_nascimento = dados["Data de nascimento"]
-                    professor.idade = professor.CalcularIdade(professor.data_nascimento)
-                except ValueError as e:
-                    return jsonify({'mensagem': str(e)}), 400
-
-                return jsonify(professor.dici())
+            db.session.commit()
+            return jsonify(professor.dici())
 
         return jsonify({'mensagem': 'Professor não encontrado'}), 404
 
@@ -103,9 +103,10 @@ def updateProfessor(idProfessor):
         return jsonify({'mensagem': f'Erro inesperado: {str(e)}'}), 500
 
 def deleteProfessor(idProfessor):
-    for professor in Professor.professores:
-        if professor.id == idProfessor:
-            Professor.professores.remove(professor)
-            return jsonify({'mensagem': 'Professor deletado'})
+    professor = Professor.query.get(idProfessor)
+    if professor:
+        db.session.delete(professor)
+        db.session.commit()
+        return jsonify({'mensagem': 'Professor deletado'})
         
     return jsonify({'mensagem': 'Professor não encontrado'}), 404

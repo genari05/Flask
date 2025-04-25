@@ -10,6 +10,8 @@ class Professor(db.Model):
     materia = db.Column(db.String(40))
     observacoes = db.Column(db.String(50))
 
+    turmas = db.relationship("Turma", back_populates="professor")
+
     def __init__(self, id, nome, idade, materia, observacoes):
         self.id = id
         self.nome = nome

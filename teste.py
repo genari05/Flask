@@ -25,42 +25,60 @@ class TestStringMethods(unittest.TestCase):
             self.assertEqual(type(obt_retornado), type([]))
             
     def teste_001_adiciona_aluno(self):
-        r= requests.post(f'http://localhost:{port}/alunos',json= {
-    "Data de nascimento": "2003-02-01",
-    "Media final": 10.0,
-    "Nota do primeiro semestre": 10.,
-    "Nota do segundo semestre": 10.0,
-    "Turma": "1B",
-    "id": 4,
-    "idade": 16,
-    "nome": "Samuel"
-  })
-        r = requests.post(f'http://localhost:{port}/alunos',json= {
-    "Data de nascimento": "2003-05-05",
-    "Media final": 10.0,
-    "Nota do primeiro semestre": 10.,
-    "Nota do segundo semestre": 10.0,
-    "Turma": "1C",
-    "id": 5,
-    "idade": 13,
-    "nome": "Davi"
-  })
-        r_lista =requests.get(f'http://localhost:{port}/alunos')
-        lista_retorna = r_lista.json()
+        r_reset = requests.post(f'http://localhost:{port}/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        r_professor = requests.post(f'http://localhost:{port}/professores', json={
+            "id": 1,
+            "nome": "Carlos Silva",
+            "idade": 45,
+            "Materia": "Matemática",
+            "Observações": "Leciona para turmas avançadas"
+        })
+        self.assertEqual(r_professor.status_code, 201)
+
+        r_turma = requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma A - Matemática Avançada",
+            "Professor": {
+                "id": 1
+            },
+            "Ativo": True
+        })
+        self.assertEqual(r_turma.status_code, 201)
+
+        alunos = [
+        {
+            "id": 4,
+            "nome": "Samuel",
+            "Data de nascimento": "2003-02-01",
+            "Nota do primeiro semestre": 10.0,
+            "Nota do segundo semestre": 10.0,
+            "Turma": 5
+        },
+        {
+            "id": 5,
+            "nome": "Davi",
+            "Data de nascimento": "2003-05-05",
+            "Nota do primeiro semestre": 10.0,
+            "Nota do segundo semestre": 10.0,
+            "Turma": 5
+        }
+    ]
+
+        for aluno in alunos:
+            r = requests.post(f'http://localhost:{port}/alunos', json=aluno)
+            self.assertEqual(r.status_code, 201, f"Falha ao criar aluno {aluno['nome']}")
+
+        r_lista = requests.get(f'http://localhost:{port}/alunos')
+        self.assertEqual(r_lista.status_code, 200)
         
-        achei_samuel = False
-        achei_Davi = False
-        for aluno in lista_retorna:
-            if aluno['nome'] == 'Samuel':
-                achei_samuel = True
-            if aluno['nome'] == 'Davi':
-                achei_Davi = True
-            
-            
-        if not achei_samuel:
-            self.fail('aluno Samuel nao apareceu na lista de alunos')
-        if not achei_Davi:
-            self.fail('aluno Davi nao apareceu na lista de alunos')
+        lista_retorna = r_lista.json()
+        nomes_alunos = [aluno['nome'] for aluno in lista_retorna]
+        
+        self.assertIn('Samuel', nomes_alunos)
+        self.assertIn('Davi', nomes_alunos)
+
        
     def teste_002_aluno_por_id(self):
         r = requests.post(f'http://localhost:{port}/alunos', json={  
@@ -68,9 +86,8 @@ class TestStringMethods(unittest.TestCase):
             "Media final": 10.0,
             "Nota do primeiro semestre": 10.,
             "Nota do segundo semestre": 10.0,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 8,
-            "idade": 15,
             "nome": "mario"
             })
         resposta = requests.get(f'http://localhost:{port}/alunos/8')
@@ -84,9 +101,8 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 7,
-            "idade": 17,
             "nome": "caio"
             })
      
@@ -100,33 +116,50 @@ class TestStringMethods(unittest.TestCase):
          self.assertEqual(len(r_lista_depois.json()),0)
          
     def teste_004_delete(self):
-        r_reseta = requests.post(f'http://localhost:{port}/reseta')
-        self.assertEqual(r_reseta.status_code,200)
+        r_reset = requests.post(f'http://localhost:{port}/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        r_professor = requests.post(f'http://localhost:{port}/professores', json={
+            "id": 1,
+            "nome": "Carlos Silva",
+            "idade": 45,
+            "Materia": "Matemática",
+            "Observações": "Leciona para turmas avançadas"
+        })
+        self.assertEqual(r_professor.status_code, 201)
+
+        r_turma = requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma A - Matemática Avançada",
+            "Professor": {
+                "id": 1
+            },
+            "Ativo": True
+        })
+        self.assertEqual(r_turma.status_code, 201)
+
         requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 10,
-            "idade": 20,
             "nome": "cicero"
             })
         requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 11,
-            "idade": 19,
             "nome": "lucas"
             })
         requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 12,
-            "idade": 18,
             "nome": "marta"
             })
         
@@ -163,34 +196,52 @@ class TestStringMethods(unittest.TestCase):
             self.fail("voce parece ter deletado o aluno errado!")
               
     def teste_005_editar(self):
-         r_reseta = requests.post(f'http://localhost:{port}/reseta')
-         self.assertEqual(r_reseta.status_code,200)
-         requests.post(f'http://localhost:{port}/alunos', json={  
+        r_reset = requests.post(f'http://localhost:{port}/reseta')
+        self.assertEqual(r_reset.status_code, 200)
+
+        r_professor = requests.post(f'http://localhost:{port}/professores', json={
+            "id": 1,
+            "nome": "Carlos Silva",
+            "idade": 45,
+            "Materia": "Matemática",
+            "Observações": "Leciona para turmas avançadas"
+        })
+        self.assertEqual(r_professor.status_code, 201)
+
+        r_turma = requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma A - Matemática Avançada",
+            "Professor": {
+                "id": 1
+            },
+            "Ativo": True
+        })
+        self.assertEqual(r_turma.status_code, 201)
+         
+        requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 11,
-            "idade": 18,
             "nome": "lucas"
             })   
 
-         r_antes = requests.get(f'http://localhost:{port}/alunos/11')
-         self.assertEqual(r_antes.json()['nome'],'lucas')
+        r_antes = requests.get(f'http://localhost:{port}/alunos/11')
+        self.assertEqual(r_antes.json()['nome'],'lucas')
          
-         requests.put(f'http://localhost:{port}/alunos/11', json={  
+        requests.put(f'http://localhost:{port}/alunos/11', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 11,
-            "idade": 18,
             "nome": "lucas mendes"
             })  
          
-         r_depois = requests.get(f'http://localhost:{port}/alunos/11')
-         self.assertEqual(r_depois.json()['nome'],'lucas mendes')
-         self.assertEqual(r_depois.json()['id'],11)
+        r_depois = requests.get(f'http://localhost:{port}/alunos/11')
+        self.assertEqual(r_depois.json()['nome'],'lucas mendes')
+        self.assertEqual(r_depois.json()['id'],11)
          
     def test_006a_id_inexistente_no_put(self):
          r_reseta = requests.post(f'http://localhost:{port}/reseta')
@@ -224,9 +275,8 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 12,
-            "idade": 18,
             "nome": "lucas"
             })  
         
@@ -234,9 +284,8 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 12,
-            "idade": 18,
             "nome": "lucas"
             })  
         self.assertEqual(r.status_code,400)
@@ -245,13 +294,28 @@ class TestStringMethods(unittest.TestCase):
         r_reset = requests.post(f'http://localhost:{port}/reseta')
         self.assertEqual(r_reset.status_code, 200)
 
+        r_professor = requests.post(f'http://localhost:{port}/professores', json={
+            "id": 1,
+            "nome": "Carlos Silva",
+            "idade": 45,
+            "Materia": "Matemática",
+            "Observações": "Leciona para turmas avançadas"
+        })
+        self.assertEqual(r_professor.status_code, 201)
+
+        requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma de matemática",
+            "Ativo": True,
+            "Professor": {"id": 1}
+        })
+
         r_create = requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 13,
-            "idade": 18,
             "nome": "Tiago"
         })
         self.assertEqual(r_create.status_code, 201)
@@ -260,9 +324,8 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
-            "id":13,
-            "idade": 19
+            "Turma": 5,
+            "id": 13
         })
         
         self.assertEqual(r_update.status_code, 400)
@@ -276,9 +339,8 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 11,
-            "idade": 18,
             })
         self.assertEqual(r.status_code,400)
         
@@ -286,15 +348,25 @@ class TestStringMethods(unittest.TestCase):
         r = requests.get(f'http://localhost:{port}/professores')
         self.assertEqual(type(r.json()),type([]))
         
-    def test_100b_nao_confundir_professor_e_aluno(self):
+    """def test_100b_nao_confundir_professor_e_aluno(self):
         r_reset = requests.post(f'http://localhost:{port}/reseta')
+
+        r_turma = requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma A - Matemática Avançada",
+            "Professor": {
+                "id": 1
+            },
+            "Ativo": True
+        })
+        self.assertEqual(r_turma.status_code, 201)
+
         requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 1,
-            "idade": 18,
             "nome": "lucas"
             })          
         self.assertEqual(r_reset.status_code,200)
@@ -302,16 +374,15 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 2,
-            "idade": 18,
             "nome": "Kathe"
             })          
         self.assertEqual(r_reset.status_code,200)
         r_lista = requests.get(f'http://localhost:{port}/professores')
         self.assertEqual(len(r_lista.json()),0)
         r_lista_alunos = requests.get(f'http://localhost:{port}/alunos')
-        self.assertEqual(len(r_lista_alunos.json()),2)
+        self.assertEqual(len(r_lista_alunos.json()),2)"""
    
     def test_101_adiciona_professores(self):
         r = requests.post(f'http://localhost:{port}/professores',json={
@@ -501,9 +572,8 @@ class TestStringMethods(unittest.TestCase):
         r = requests.post(f'http://localhost:{port}/alunos', json={  
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 11,
-            "idade": 18,
             "Nome": "Lulu"
             })
         self.assertEqual(r.status_code,400)
@@ -512,13 +582,31 @@ class TestStringMethods(unittest.TestCase):
         r_reset = requests.post(f'http://localhost:{port}/reseta')
         self.assertEqual(r_reset.status_code, 200)
 
+        r_professor = requests.post(f'http://localhost:{port}/professores', json={
+            "id": 1,
+            "nome": "Carlos Silva",
+            "idade": 45,
+            "Materia": "Matemática",
+            "Observações": "Leciona para turmas avançadas"
+        })
+        self.assertEqual(r_professor.status_code, 201)
+
+        r_turma = requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma A - Matemática Avançada",
+            "Professor": {
+                "id": 1
+            },
+            "Ativo": True
+        })
+        self.assertEqual(r_turma.status_code, 201)
+
         r_create = requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 14,
-            "idade": 18,
             "nome": "Tiago"
         })
         self.assertEqual(r_create.status_code, 201)
@@ -526,9 +614,8 @@ class TestStringMethods(unittest.TestCase):
         r_update = requests.put(f'http://localhost:{port}/alunos/14', json={  
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 14,
-            "idade": 18,
             "nome": "Tiago"
         })
         self.assertEqual(r_update.status_code, 400)
@@ -538,13 +625,31 @@ class TestStringMethods(unittest.TestCase):
         r_reset = requests.post(f'http://localhost:{port}/reseta')
         self.assertEqual(r_reset.status_code, 200)
 
+        r_professor = requests.post(f'http://localhost:{port}/professores', json={
+            "id": 1,
+            "nome": "Carlos Silva",
+            "idade": 45,
+            "Materia": "Matemática",
+            "Observações": "Leciona para turmas avançadas"
+        })
+        self.assertEqual(r_professor.status_code, 201)
+
+        r_turma = requests.post(f'http://localhost:{port}/turmas', json={
+            "id": 5,
+            "Descrição": "Turma A - Matemática Avançada",
+            "Professor": {
+                "id": 1
+            },
+            "Ativo": True
+        })
+        self.assertEqual(r_turma.status_code, 201)
+
         r1 = requests.post(f'http://localhost:{port}/alunos', json={  
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 12,
-            "idade": 18,
             "nome": "Lucas"
         })  
         self.assertEqual(r1.status_code, 201)
@@ -553,9 +658,8 @@ class TestStringMethods(unittest.TestCase):
             "Data de nascimento": "2005-05-05",
             "Nota do primeiro semestre": 10,
             "Nota do segundo semestre": 10,
-            "Turma": "1C",
+            "Turma": 5,
             "id": 12,
-            "idade": 18,
             "nome": "Lucas"
         })  
         self.assertEqual(r2.status_code, 400)

@@ -1,5 +1,8 @@
 from config import app, db
 from flask import Flask,Blueprint
+from model.aluno_model import Aluno
+from model.professor_model import Professor
+from model.turma_model import Turma
 from controller.aluno import Alunos_Blueprint
 from controller.professor import Professor_Blueprint
 from controller.reseta import Reseta_Blueprint

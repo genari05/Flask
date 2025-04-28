@@ -5,52 +5,48 @@ from model.professor_model import Get_professores,getProfessorPorID,createProfes
 professor_ns = Namespace("Professor ", description="Operações relacionadas aos professores")
 
 professor_model = professor_ns.model("Professor", {
-    "Nome": fields.String(required=True, description="Nome do professor"),
-    "Idade": fields.Integer(required=True, description="Idade"),
+    "nome": fields.String(required=True, description="Nome do professor"),
+    "idade": fields.Integer(required=True, description="Idade"),
     "Materia": fields.String(required=True, description="Descrição do professor"),
-    "Observação": fields.String(required=True, description="Nota do segundo semestre"),
+    "Observações": fields.String(required=True, description="Nota do segundo semestre"),
 })
 
 
 professor_model_output = professor_ns.model("ProfessorOutput", {
     "id": fields.Integer(description="ID do professor"),
-    "Nome": fields.String(required=True, description="Nome do professor"),
-    "Idade": fields.Integer(required=True, description="Idade"),
+    "nome": fields.String(required=True, description="Nome do professor"),
+    "idade": fields.Integer(required=True, description="Idade"),
     "Materia": fields.String(required=True, description="Descrição do professor"),
-    "Observação": fields.String(required=True, description="Nota do segundo semestre"),
+    "Observações": fields.String(required=True, description="Nota do segundo semestre"),
 })
 
-
 @professor_ns.route('/')
-class ProfssorResource(Resource):
+class ProfessorResource(Resource):
     @professor_ns.marshal_list_with(professor_model_output)
     def get(self):
         '''Listar todos os professores'''
         return Get_professores()
     
     @professor_ns.expect(professor_model)
+    @professor_ns.marshal_with(professor_model_output, code=201)
     def post(self):
         '''Criar um novo professor'''
-        data = professor_ns.payload
-        response,status_code = createProfessor(data)
-        return response,status_code
-    
+        return createProfessor()
 
 @professor_ns.route('/<int:id_professores>')
 class ProfessorIdResource(Resource):
-    @professor_ns.marshal_list_with(professor_model_output)
-    def get(self,id_profeessor):
+    @professor_ns.marshal_with(professor_model_output)
+    def get(self, id_professores):
         '''Obtém um professor pelo ID'''
-        return getProfessorPorID(id_profeessor)
+        return getProfessorPorID(id_professores)
     
     @professor_ns.expect(professor_model)
-    def put(self,Id_professor):
+    def put(self, id_professores):
         data = professor_ns.payload
-        updateProfessor(Id_professor,data)
-        return data, 200
+        updateProfessor(id_professores, data)
+        return {"message": "Professor atualizado com sucesso"}, 200
     
-    def delete(self,Id_professor):
+    def delete(self, id_professores):
         '''Excluir professor por id'''
-        deleteProfessor(Id_professor)
-        return{'messagem':'Professor excluido com sucesso'}, 200    
-    
+        deleteProfessor(id_professores)
+        return {'message': 'Professor excluído com sucesso'}, 200

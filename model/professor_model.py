@@ -30,12 +30,12 @@ class Professor(db.Model):
 
 def Get_professores():
     professores = Professor.query.all()
-    return [professor.dici() for professor in professores]  # <<< sem jsonify
+    return [professor.dici() for professor in professores]
 
 def getProfessorPorID(idProfessor):
     professor = Professor.query.get(idProfessor)
     if professor:
-        return professor.dici()  # <<< sem jsonify
+        return professor.dici()
     return {'mensagem': 'Professor não encontrado'}, 404
 
 def createProfessor():
@@ -66,7 +66,7 @@ def createProfessor():
     )
     db.session.add(novo_professor)
     db.session.commit()
-    return novo_professor.dici(), 201  # <<< sem jsonify
+    return novo_professor.dici(), 201
 
 def updateProfessor(idProfessor, data):
     professor = Professor.query.get(idProfessor)

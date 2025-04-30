@@ -13,13 +13,13 @@ aluno_model = alunos_ns.model("Aluno", {
 
 aluno_output_model = alunos_ns.model("AlunoOutput", {
     "id": fields.Integer(description="ID do aluno"),
-    "nome": fields.String(description="Nome do aluno"),
-    "idade": fields.Integer(description="Idade do aluno"),
-    "Data de nascimento": fields.String(description="Data de nascimento (YYYY-MM-DD)"),
-    "Nota do primeiro semestre": fields.Float(description="Nota do primeiro semestre"),
-    "Nota do segundo semestre": fields.Float(description="Nota do segundo semestre"),
-    "Media final": fields.Float(description="Média final do aluno"),
-    "Turma": fields.Integer(description="ID da turma associada"),
+    "nome": fields.String(required=True, description="Nome do aluno"),
+    "idade": fields.Integer(required=True, description="Idade do aluno"),
+    "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)"),
+    "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre"),
+    "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre"),
+    "Media final": fields.Float(required=True, description="Média final do aluno"),
+    "Turma": fields.Integer(required=True, description="ID da turma associada"),
 })
 
 @alunos_ns.route("/")
@@ -36,7 +36,7 @@ class AlunosResource(Resource):
         aluno_criado, status = createAluno()
         if status != 201:
             return aluno_criado, status
-        return aluno_criado, status  # Retorna o aluno criado com status 201
+        return aluno_criado, status
 
 @alunos_ns.route("/<int:id_aluno>")
 class AlunoIdResource(Resource):
@@ -48,11 +48,9 @@ class AlunoIdResource(Resource):
     @alunos_ns.expect(aluno_model)
     def put(self, id_aluno):
         """Atualiza um aluno pelo ID"""
-        dados = alunos_ns.payload  # Dados enviados no corpo da requisição
-        aluno_atualizado = updateAluno(id_aluno, dados)  # Atualizar o aluno
-        if isinstance(aluno_atualizado, dict):  # Caso seja um dicionário de erro
-            return aluno_atualizado, 400
-        return aluno_atualizado, 200  # Retornar o aluno atualizado com status 200
+        dados = alunos_ns.payload
+        updateAluno(id_aluno, dados)
+        return {"message": "Aluno atualizado com sucesso"}, 200
 
     def delete(self, id_aluno):
         """Exclui um aluno pelo ID"""

@@ -31,46 +31,32 @@ class Turma(db.Model):
 
 def Get_turmas():
     turmas = Turma.query.all()
-    return jsonify([turma.dici() for turma in turmas])
+    return [turma.dici() for turma in turmas]
 
 def getTurmaPorID(idTurma):
     turma = Turma.query.get(idTurma)
     if turma:
-        return jsonify(
-            {
-                "id": turma.id,
-                "Descrição": turma.descricao,
-                "Ativo": turma.ativo,
-                "Professor": {
-                    "id": turma.professor.id,
-                    "nome": turma.professor.nome,
-                    "idade": turma.professor.idade,
-                    "Materia": turma.professor.materia,
-                    "Observações": turma.professor.observacoes,
-                } if turma.professor else None
-            }
-        )
-
-    return jsonify({'mensagem': 'Turma não encontrada'}), 404
+        return turma.dici()
+    return {'mensagem': 'Turma não encontrada'}, 404
 
 def createTurma():
     dados = request.json
 
     id = dados.get("id", "")
     if not id:
-        return jsonify({'mensagem': 'A turma necessita de um id'}), 400
+        return {'mensagem': 'A turma necessita de um id'}, 400
     if not isinstance(id, int) or id <= 0:
-        return jsonify({'mensagem': 'ID da turma deve ser numérico'}), 400
+        return {'mensagem': 'ID da turma deve ser numérico'}, 400
     if Turma.query.get(id):
-        return jsonify({'mensagem': 'ID já utilizado'}), 400
+        return {'mensagem': 'ID já utilizado'}, 400
 
     descricao = dados.get("Descrição", "")
     if not descricao:
-        return jsonify({'mensagem': 'A turma necessita de uma descrição'}), 400
+        return {'mensagem': 'A turma necessita de uma descrição'}, 400
     
     ativo = dados.get("Ativo", "")
     if not isinstance(ativo, bool):
-        return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
+        return {'mensagem': 'A turma deve estar ativa ou inativa'}, 400
 
     nova_turma = Turma(
         id = id,
@@ -81,7 +67,7 @@ def createTurma():
 
     db.session.add(nova_turma)
     db.session.commit()
-    return jsonify(nova_turma.dici()), 201
+    return nova_turma.dici(), 201
 
 def updateTurma(idTurma):
     turma = Turma.query.get(idTurma)
@@ -90,11 +76,11 @@ def updateTurma(idTurma):
 
         descricao = dados.get("Descrição", "")
         if not descricao:
-            return jsonify({'mensagem': 'A turma necessita de uma descrição'}), 400
+            return {'mensagem': 'A turma necessita de uma descrição'}, 400
     
         ativo = dados.get("Ativo", "")
         if not ativo:
-            return jsonify({'mensagem': 'A turma deve estar ativa ou inativa'}), 400
+            return {'mensagem': 'A turma deve estar ativa ou inativa'}, 400
             
         turma.id = turma.id
         turma.descricao = descricao
@@ -104,19 +90,19 @@ def updateTurma(idTurma):
         if professor_id:
             professor = Professor.query.get(professor_id)
             if not professor:
-                return jsonify({'mensagem': 'Professor não encontrado'}), 404
+                return {'mensagem': 'Professor não encontrado'}, 404
             turma.professor = professor
                 
         db.session.commit()
-        return jsonify(turma.dici())
+        return turma.dici()
     
-    return jsonify({'mensagem': 'Turma não encontrada'}), 404
+    return {'mensagem': 'Turma não encontrada'}, 404
 
 def deleteTurma(idTurma):
     turma = Turma.query.get(idTurma)
     if turma:
         db.session.delete(turma)
         db.session.commit()
-        return jsonify({'mensagem': 'Turma deletada'})
+        return {'mensagem': 'Turma deletada'}
         
-    return jsonify({'mensagem': 'Turma não encontrada'}), 404
+    return {'mensagem': 'Turma não encontrada'}, 404

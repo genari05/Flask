@@ -6,8 +6,8 @@ alunos_ns = Namespace("Aluno", description="Operações relacionadas aos alunos"
 aluno_model = alunos_ns.model("Aluno", {
     "nome": fields.String(required=True, description="Nome do aluno"),
     "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)"),
-    "Nota primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre"),
-    "Nota segundo semestre": fields.Float(required=True, description="Nota do segundo semestre"),
+    "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre"),
+    "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre"),
     "Turma": fields.Integer(required=True, description="ID da turma associada"),
 })
 
@@ -50,9 +50,9 @@ class AlunoIdResource(Resource):
         """Atualiza um aluno pelo ID"""
         dados = alunos_ns.payload
         updateAluno(id_aluno, dados)
-        return {"message": "Aluno atualizado com sucesso"}, 200
+        return dados, 200
 
     def delete(self, id_aluno):
         """Exclui um aluno pelo ID"""
         resultado = deleteAluno(id_aluno)
-        return resultado
+        return resultado, 200

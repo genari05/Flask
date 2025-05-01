@@ -12,8 +12,7 @@ class Professor(db.Model):
 
     turmas = db.relationship("Turma", back_populates="professor")
 
-    def __init__(self, id, nome, idade, materia, observacoes):
-        self.id = id
+    def __init__(self, nome, idade, materia, observacoes):
         self.nome = nome
         self.idade = idade
         self.materia = materia
@@ -41,14 +40,6 @@ def getProfessorPorID(idProfessor):
 def createProfessor():
     dados = request.json
 
-    id = dados.get("id", "")
-    if not id:
-        return {'mensagem': 'O professor necessita de um id'}, 400
-    if not isinstance(id, int) or id <= 0:
-        return {'mensagem': 'ID inválido. Deve ser um número inteiro positivo'}, 400
-    if Professor.query.get(id):
-        return {'mensagem': 'ID já utilizado'}, 400
-
     nome = dados.get("nome", "")
     if not nome:
         return {'mensagem': 'O professor necessita de um nome'}, 400
@@ -58,7 +49,6 @@ def createProfessor():
         return {'mensagem': 'O professor necessita de uma matéria'}, 400
 
     novo_professor = Professor(
-        id=id,
         nome=nome,
         idade=dados.get("idade", ""),
         materia=materia,

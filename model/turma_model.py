@@ -13,8 +13,7 @@ class Turma(db.Model):
     professor = db.relationship("Professor", back_populates="turmas")
     alunos = db.relationship("Aluno", back_populates="turma")
 
-    def __init__(self, id, descricao, id_professor, ativo=True):
-        self.id = id
+    def __init__(self, descricao, id_professor, ativo=True):
         self.descricao = descricao
         self.id_professor = id_professor
         self.ativo = ativo
@@ -42,14 +41,6 @@ def getTurmaPorID(idTurma):
 def createTurma():
     dados = request.json
 
-    id = dados.get("id", "")
-    if not id:
-        return {'mensagem': 'A turma necessita de um id'}, 400
-    if not isinstance(id, int) or id <= 0:
-        return {'mensagem': 'ID da turma deve ser numérico'}, 400
-    if Turma.query.get(id):
-        return {'mensagem': 'ID já utilizado'}, 400
-
     descricao = dados.get("Descrição", "")
     if not descricao:
         return {'mensagem': 'A turma necessita de uma descrição'}, 400
@@ -59,7 +50,6 @@ def createTurma():
         return {'mensagem': 'A turma deve estar ativa ou inativa'}, 400
 
     nova_turma = Turma(
-        id = id,
         descricao = descricao,
         id_professor = dados.get('Professor', {}).get('id'),
         ativo = ativo

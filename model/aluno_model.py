@@ -16,13 +16,12 @@ class Aluno(db.Model):
 
     turma = db.relationship("Turma", back_populates="alunos")
 
-    def __init__(self, id, nome, id_turma, data_nascimento, nota_semestre_1, nota_semestre_2):
+    def __init__(self, nome, id_turma, data_nascimento, nota_semestre_1, nota_semestre_2):
         if not isinstance(nome, str) or len(nome) > 100:
             raise ValueError("Nome inválido. Deve ser uma string de até 100 caracteres")
         if not isinstance(nota_semestre_1, (int, float)) or not isinstance(nota_semestre_2, (int, float)):
             raise ValueError("Notas inválidas. Devem ser números float")
         
-        self.id = id
         self.nome = nome
         self.id_turma = id_turma
         if isinstance(data_nascimento, str):
@@ -63,14 +62,6 @@ def getAlunosPorID(idAluno):
 def createAluno():
     dados = request.json
 
-    id = dados.get("id", "")
-    if not id:
-        return {'mensagem': 'O aluno necessita de um id'}, 400
-    if not isinstance(id, int) or id <= 0:
-        return {'mensagem': 'ID inválido. Deve ser um número inteiro positivo'}, 400
-    if Aluno.query.get(id):
-            return {'mensagem': 'ID já utilizado'}, 400
-
     nome = dados.get("nome", "")
     if not nome:
         return {'mensagem': 'O aluno necessita de um nome'}, 400
@@ -93,7 +84,6 @@ def createAluno():
 
     try:
         novo_aluno = Aluno(
-            id = id,
             nome = nome,
             id_turma = turma.id,
             data_nascimento = data_nascimento,

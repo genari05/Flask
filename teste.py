@@ -251,11 +251,14 @@ class TestStringMethods(unittest.TestCase):
          self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
                 
     def test_006b_id_inexistente_no_get(self):
+        # Reseta o estado inicial, como se fosse um "limpar banco de dados"
         r_reset = requests.post(f'http://localhost:{port}/reseta')
-        self.assertEqual(r_reset.status_code,200)
+        self.assertEqual(r_reset.status_code, 200)  # Verifica se a requisição de reset foi bem-sucedida
         r = requests.get(f'http://localhost:{port}/alunos/15')
-        self.assertIn(r.status_code,[400,404])
+        self.assertEqual(r.status_code, 404)
+        self.assertIn('mensagem', r.json())
         self.assertEqual(r.json()['mensagem'], 'Aluno não encontrado')
+
 
     def test_006c_id_inexistente_no_delete(self):
         r_reset = requests.post(f'http://localhost:{port}/reseta')

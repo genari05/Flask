@@ -9,9 +9,8 @@ from controller.professor import Professor_Blueprint
 from controller.reseta import Reseta_Blueprint
 from controller.turma import Turma_Blueprint
 
-# =================== CONFIGURAÇÃO DO SWAGGER PRIMEIRO ========
+# =================== CONFIGURAÇÃO DO SWAGGER ========
 configure_swagger(app)
-
 # =================== ROUTES ALUNO ===================
 app.register_blueprint(Alunos_Blueprint)
 # =================== ROUTES PROFESSOR ===============
@@ -20,7 +19,6 @@ app.register_blueprint(Professor_Blueprint)
 app.register_blueprint(Turma_Blueprint)
 # =================== ROUTES RESETA ==================
 app.register_blueprint(Reseta_Blueprint)
-
 # =================== CRIAR TABELAS ===================
 with app.app_context():
     db.create_all()

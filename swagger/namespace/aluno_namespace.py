@@ -43,16 +43,20 @@ class AlunoIdResource(Resource):
     @alunos_ns.marshal_with(aluno_output_model)
     def get(self, id_aluno):
         """Obtém um aluno pelo ID"""
-        return getAlunosPorID(id_aluno)
+        resposta, status_code = getAlunosPorID(id_aluno)
+        return resposta, status_code
+
+
 
     @alunos_ns.expect(aluno_model)
     def put(self, id_aluno):
         """Atualiza um aluno pelo ID"""
         dados = alunos_ns.payload
-        updateAluno(id_aluno, dados)
-        return dados, 200
+        resposta, status_code = updateAluno(id_aluno, dados)
+        return resposta, status_code
+
 
     def delete(self, id_aluno):
         """Exclui um aluno pelo ID"""
-        resultado = deleteAluno(id_aluno)
-        return resultado, 200
+        resultado,status_code = deleteAluno(id_aluno)
+        return resultado, status_code

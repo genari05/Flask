@@ -56,8 +56,12 @@ def Listar_aluno():
 def getAlunosPorID(idAluno):
     aluno = Aluno.query.get(idAluno)
     if aluno:
-        return aluno.dici()
-    return {'mensagem': 'Aluno não encontrado'}, 404
+        return aluno.dici(), 200  # Se o aluno for encontrado, retorna seus dados
+    else:
+        # Caso o aluno não seja encontrado, retorna um erro com a chave 'mensagem'
+        return {'mensagem': 'Aluno não encontrado'}, 404
+
+
 
 def createAluno():
     dados = request.json

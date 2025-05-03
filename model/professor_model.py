@@ -34,12 +34,11 @@ def Get_professores():
 def getProfessorPorID(idProfessor):
     professor = Professor.query.get(idProfessor)
     if professor:
-        return professor.dici()
-    return {'mensagem': 'Professor não encontrado'}, 404
+        return professor.dici(), 200
+    else:
+        return {'mensagem': 'Professor não encontrado'}, 404
 
-def createProfessor():
-    dados = request.json
-
+def createProfessor(dados):
     nome = dados.get("nome", "")
     if not nome:
         return {'mensagem': 'O professor necessita de um nome'}, 400

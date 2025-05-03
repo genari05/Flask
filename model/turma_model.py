@@ -35,12 +35,11 @@ def Get_turmas():
 def getTurmaPorID(idTurma):
     turma = Turma.query.get(idTurma)
     if turma:
-        return turma.dici()
-    return {'mensagem': 'Turma não encontrada'}, 404
+        return turma.dici(), 200
+    else:
+        return {'mensagem': 'Turma não encontrada'}, 404
 
-def createTurma():
-    dados = request.json
-
+def createTurma(dados):
     descricao = dados.get("Descrição", "")
     if not descricao:
         return {'mensagem': 'A turma necessita de uma descrição'}, 400
@@ -59,11 +58,9 @@ def createTurma():
     db.session.commit()
     return nova_turma.dici(), 201
 
-def updateTurma(idTurma):
+def updateTurma(idTurma, dados):
     turma = Turma.query.get(idTurma)
     if turma:
-        dados = request.json
-
         descricao = dados.get("Descrição", "")
         if not descricao:
             return {'mensagem': 'A turma necessita de uma descrição'}, 400
@@ -72,7 +69,6 @@ def updateTurma(idTurma):
         if not ativo:
             return {'mensagem': 'A turma deve estar ativa ou inativa'}, 400
             
-        turma.id = turma.id
         turma.descricao = descricao
         turma.ativo = ativo
 
@@ -84,7 +80,7 @@ def updateTurma(idTurma):
             turma.professor = professor
                 
         db.session.commit()
-        return turma.dici()
+        return turma.dici(), 200
     
     return {'mensagem': 'Turma não encontrada'}, 404
 

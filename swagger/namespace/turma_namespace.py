@@ -20,6 +20,10 @@ turma_model_output = turma_ns.model("TurmaOutput", {
     }), allow_null=True)
 })
 
+erro_model = turma_ns.model("Erro", {
+    "mensagem": fields.String(example="Turma não encontrada")
+})
+
 @turma_ns.route('/')
 class TurmaResource(Resource):
     @turma_ns.marshal_list_with(turma_model_output)
@@ -28,26 +32,34 @@ class TurmaResource(Resource):
         return Get_turmas()
     
     @turma_ns.expect(turma_model)
-    @turma_ns.marshal_with(turma_model_output, code=201)
+    @turma_ns.response(201, "Turma criada com sucesso", model=turma_model_output)
+    @turma_ns.response(400, "Dados inválidos", model=erro_model)
     def post(self):
         '''Criar uma nova turma'''
-        return createTurma()
+        dados = turma_ns.payload
+        resultado, status_code = createTurma(dados)
+        return resultado, status_code
 
 @turma_ns.route('/<int:id_turma>')
 class TurmaIdResource(Resource):
-    @turma_ns.marshal_with(turma_model_output)
+    @turma_ns.response(200, "Turma encontrado", turma_model_output)
+    @turma_ns.response(404, "Turma não encontrada", model=erro_model)
     def get(self, id_turma):
         '''Obter uma turma pelo ID'''
-        return getTurmaPorID(id_turma)
+        resultado, status_code = getTurmaPorID(id_turma)
+        return resultado, status_code
     
     @turma_ns.expect(turma_model)
-    @turma_ns.marshal_with(turma_model_output)
+    @turma_ns.response(400, "Dados inválidos", erro_model)
+    @turma_ns.response(404, "Turma não encontrada", model=erro_model)
     def put(self, id_turma):
         '''Atualizar uma turma pelo ID'''
-        updateTurma(id_turma)
-        return {"message": "Turma atualizada com sucesso"}, 200
+        dados = turma_ns.payload
+        resultado, status_code = updateTurma(id_turma, dados)
+        return resultado, status_code
     
+    @turma_ns.response(404, "Turma não encontrada", model=erro_model)
     def delete(self, id_turma):
         '''Excluir uma turma pelo ID'''
-        deleteTurma(id_turma)
-        return {'message': 'Turma excluída com sucesso'}, 200
+        resultado, status_code = deleteTurma(id_turma)
+        return resultado, status_code

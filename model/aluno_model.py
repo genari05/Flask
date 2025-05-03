@@ -43,7 +43,7 @@ class Aluno(db.Model):
             "nome": self.nome,
             "idade": self.CalcularIdade(self.data_nascimento),
             "Turma": self.id_turma,
-            "Data de nascimento": self.data_nascimento,
+            "Data de nascimento": self.data_nascimento.isoformat(),
             "Nota do primeiro semestre": self.nota_semestre_1,
             "Nota do segundo semestre": self.nota_semestre_2,
             "Media final": self.media_final
@@ -56,23 +56,18 @@ def Listar_aluno():
 def getAlunosPorID(idAluno):
     aluno = Aluno.query.get(idAluno)
     if aluno:
-        return aluno.dici(), 200  # Se o aluno for encontrado, retorna seus dados
+        return aluno.dici(), 200
     else:
-        # Caso o aluno não seja encontrado, retorna um erro com a chave 'mensagem'
         return {'mensagem': 'Aluno não encontrado'}, 404
 
-
-
-def createAluno():
-    dados = request.json
-
+def createAluno(dados):
     nome = dados.get("nome", "")
     if not nome:
         return {'mensagem': 'O aluno necessita de um nome'}, 400
     
     turma = Turma.query.get(dados['Turma'])
     if(turma is None):
-            return {"message": "Turma não existe"}, 400
+        return {"message": "Turma não existe"}, 400
     
     data_nascimento = dados.get("Data de nascimento", "")
     if data_nascimento:
@@ -100,7 +95,6 @@ def createAluno():
     db.session.add(novo_aluno)
     db.session.commit()
     return novo_aluno.dici(), 201
-
 
 def updateAluno(idAluno, dados):
     try:

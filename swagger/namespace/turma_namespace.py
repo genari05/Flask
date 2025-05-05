@@ -4,19 +4,19 @@ from model.turma_model import Get_turmas, getTurmaPorID, createTurma, updateTurm
 turma_ns = Namespace("Turma", description="Operações relacionadas às turmas")
 
 turma_model = turma_ns.model("Turma", {
-    "Descrição": fields.String(required=True, description="Descrição da Turma"),
+    "Descrição": fields.String(required=True, description="Descrição da Turma", exemple = '1b'),
     "Ativo": fields.Boolean(required=True, description="Indica se a turma está ativa"),
     "Professor": fields.Nested(turma_ns.model("ProfessorRef", {
-        "id": fields.Integer(required=True, description="ID do professor responsável")
+        "id": fields.Integer(required=True, description="ID do professor responsável", exemple = 1)
     }))
 })
 
 turma_model_output = turma_ns.model("TurmaOutput", {
-    "id": fields.Integer(description="ID do professor"),
-    "Descrição": fields.String(required=True, description="Descrição da Turma"),
+    "id": fields.Integer(description="ID do professor", exemple = 1),
+    "Descrição": fields.String(required=True, description="Descrição da Turma", exemple = '1b'),
     "Ativo": fields.Boolean(required=True, description="Indica se a turma está ativa"),
     "Professor": fields.Nested(turma_ns.model("ProfessorInfo", {
-        "nome": fields.String(description="Nome do professor")
+        "nome": fields.String(description="Nome do professor", exemple= 'Marcos')
     }), allow_null=True)
 })
 

@@ -4,18 +4,18 @@ from model.professor_model import Get_professores,getProfessorPorID,createProfes
 professor_ns = Namespace("Professor ", description="Operações relacionadas aos professores")
 
 professor_model = professor_ns.model("Professor", {
-    "nome": fields.String(required=True, description="Nome do professor"),
-    "idade": fields.Integer(required=True, description="Idade"),
-    "Materia": fields.String(required=True, description="Descrição do professor"),
-    "Observações": fields.String(required=True, description="Nota do segundo semestre"),
+    "nome": fields.String(required=True, description="Nome do professor",exemple='Marcos Nascimento'),
+    "idade": fields.Integer(required=True, description="Idade",exemple=45),
+    "Materia": fields.String(required=True, description="Descrição do professor",exemple='Matematica'),
+    "Observações": fields.String(required=True, description="Nota do segundo semestre",exemple='Leciona para turmas avançadas'),
 })
 
 professor_model_output = professor_ns.model("ProfessorOutput", {
-    "id": fields.Integer(description="ID do professor"),
-    "nome": fields.String(required=True, description="Nome do professor"),
-    "idade": fields.Integer(required=True, description="Idade"),
-    "Materia": fields.String(required=True, description="Descrição do professor"),
-    "Observações": fields.String(required=True, description="Nota do segundo semestre"),
+    "id": fields.Integer(description="ID do professor", exemple = 1),
+    "nome": fields.String(required=True, description="Nome do professor", exemple = 'Marcos Nascimento'),
+    "idade": fields.Integer(required=True, description="Idade",exemple=45),
+    "Materia": fields.String(required=True, description="Descrição do professor",exemple='Matematica'),
+    "Observações": fields.String(required=True, description="Nota do segundo semestre",exemple='Leciona para turmas avançadas'),
 })
 
 erro_model = professor_ns.model("Erro", {

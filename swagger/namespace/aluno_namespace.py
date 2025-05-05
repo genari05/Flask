@@ -4,22 +4,22 @@ from model.aluno_model import Listar_aluno, createAluno, updateAluno, deleteAlun
 alunos_ns = Namespace("Aluno", description="Operações relacionadas aos alunos")
 
 aluno_model = alunos_ns.model("Aluno", {
-    "nome": fields.String(required=True, description="Nome do aluno"),
-    "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)"),
-    "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre"),
-    "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre"),
-    "Turma": fields.Integer(required=True, description="ID da turma associada"),
+    "nome": fields.String(required=True, description="Nome do aluno", example = 'Tiago Genari'),
+    "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)",example = '2005-05-28'),
+    "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre",example = 7.8),
+    "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre",example = 9.0),
+    "Turma": fields.Integer(required=True, description="ID da turma associada",example = 1),
 })
 
 aluno_output_model = alunos_ns.model("AlunoOutput", {
     "id": fields.Integer(description="ID do aluno"),
     "nome": fields.String(required=True, description="Nome do aluno"),
     "idade": fields.Integer(required=True, description="Idade do aluno"),
-    "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)"),
-    "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre"),
-    "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre"),
-    "Media final": fields.Float(required=True, description="Média final do aluno"),
-    "Turma": fields.Integer(required=True, description="ID da turma associada"),
+    "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)",example = '2005-05-28'),
+    "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre",example = 7.8),
+    "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre",example = 9.0),
+    "Media final": fields.Float(required=True, description="Média final do aluno",exemple = 8.4),
+    "Turma": fields.Integer(required=True, description="ID da turma associada", exemple= 1),
 })
 
 erro_model = alunos_ns.model("Erro", {

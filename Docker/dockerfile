@@ -1,0 +1,17 @@
+# Utiliza a imagem oficial do Python 3.8 slim
+FROM python:3.8-slim
+
+# Define o diretório de trabalho no container
+WORKDIR /app
+
+# Copia o conteúdo do diretório local para o diretório de trabalho no container
+COPY . .
+
+# Instala as dependências Python
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Expõe a porta em que o Flask vai rodar
+EXPOSE 5000
+
+# Comando para rodar o app
+CMD ["python", "app.py"]

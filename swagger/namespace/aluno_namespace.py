@@ -12,9 +12,9 @@ aluno_model = alunos_ns.model("Aluno", {
 })
 
 aluno_output_model = alunos_ns.model("AlunoOutput", {
-    "id": fields.Integer(description="ID do aluno"),
-    "nome": fields.String(required=True, description="Nome do aluno"),
-    "idade": fields.Integer(required=True, description="Idade do aluno"),
+    "id": fields.Integer(description="ID do aluno",example = 1),
+    "nome": fields.String(required=True, description="Nome do aluno",example = 'Tiago Genari'),
+    "idade": fields.Integer(required=True, description="Idade do aluno", example = 20),
     "Data de nascimento": fields.String(required=True, description="Data de nascimento (YYYY-MM-DD)",example = '2005-05-28'),
     "Nota do primeiro semestre": fields.Float(required=True, description="Nota do primeiro semestre",example = 7.8),
     "Nota do segundo semestre": fields.Float(required=True, description="Nota do segundo semestre",example = 9.0),
